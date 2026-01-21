@@ -1,0 +1,9 @@
+numpy
+pandas
+tensorflow
+scikit-learn
+imbalanced-learn
+matplotlib
+seaborn
+pycountry
+names
