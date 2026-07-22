@@ -51,7 +51,7 @@ class SplitData:
     def fit(self):
         # Ensure data exists before scaling
         if self.training['x'] is None:
-            raise ValueError("Must split data before calling fit()")
+            raise ValueError("🚩Must split data before calling fit()")
 
         numeric_features = self.training['x'].select_dtypes(include=['number']).columns
 

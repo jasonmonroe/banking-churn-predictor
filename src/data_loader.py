@@ -1,7 +1,7 @@
 
 import os
 import pandas as pd
-from src.preprocessing import drop_columns
+#from src.preprocessing import drop_columns
 from src.seeder import Seeder
 
 def load_and_clean_data(file_path: str) -> pd.DataFrame:

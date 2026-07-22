@@ -36,6 +36,7 @@ def get_smote(data_sp):
     # No need to re-scale. x_smote is already in the 0-1 range.
     return x_smote, y_smote
 
+# @TODO - delete
 # Not in use
 def split_data(df: pd.DataFrame):
 

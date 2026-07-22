@@ -1,16 +1,37 @@
+# src/eda.py
+# Perform Univariate Analysis by creating box plots, histograms, density plots for each column.
+
+# Python Libraries
+
+# Vendor Libraries
+
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-
-# TensorFlow/Keras
 import tensorflow as tf
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, History
-import src.constants as const
+from sklearn.metrics import (
+    accuracy_score,
+    classification_report,
+    confusion_matrix,
+    explained_variance_score,
+    f1_score,
+    mean_absolute_error,
+    mean_squared_error,
+    precision_score,
+    r2_score,
+    recall_score,
+)
+from tensorflow.keras.models import Sequential
+
+# Local Libraries
+from src.constants import TARGET_COL, BALANCE_THRESHOLD, PREDICTION_PROB_THRESHOLD, PEP8_LINE_LEN
 
 """ 
 Perform Univariate Analysis by creating box plots, histograms, density plots for each column.
 """
 
+# @TODO - defunct
 def observe_data(data: pd.DataFrame):
     print(data.head())
     print(data.tail())
@@ -25,45 +46,47 @@ def observe_data(data: pd.DataFrame):
     data.isnull().sum()
 
 
-def show_visualizations(data: pd.DataFrame):
+def show_visualizations(data: pd.DataFrame) -> None:
+    print("# --- 📊 Showing Visualizations 📊 --- #")
+
     # Display histogram
-    histogram_boxplot(data, 'credit_score')
+    histogram_boxplot(data, "credit_score")
 
     # Display Geography barplot
-    labeled_barplot(data, 'geography', perc=True)
+    labeled_barplot(data, "geography", perc=True)
 
     # Display Gender barplot
-    labeled_barplot(data, 'gender', perc=True)
+    labeled_barplot(data, "gender", perc=True)
 
     # Display age histogram
-    histogram_boxplot(data, 'age')
+    histogram_boxplot(data, "age")
 
     # Display tenure barplot
-    labeled_barplot(data, 'tenure', perc=True)
+    labeled_barplot(data, "tenure", perc=True)
 
-    labeled_barplot(data, 'num_of_products', perc=True)
+    labeled_barplot(data, "num_of_products", perc=True)
 
-    histogram_boxplot(data, 'balance')
+    histogram_boxplot(data, "balance")
 
-    labeled_barplot(data, 'has_cr_card', perc=True)
+    labeled_barplot(data, "has_cr_card", perc=True)
 
-    histogram_boxplot(data, 'estimated_salary')
+    histogram_boxplot(data, "estimated_salary")
 
-    labeled_barplot(data, 'is_active_member', perc=True)
+    labeled_barplot(data, "is_active_member", perc=True)
 
     # Display exited barplot
-    labeled_barplot(data, 'exited', perc=True)
+    labeled_barplot(data, TARGET_COL, perc=True)
 
 
-def show_salary_barplot_visualization(df: pd.DataFrame):
-    # Compare estimated salary to bank balance to see if there's a correlation.
+def show_salary_barplot_visualization(df: pd.DataFrame) -> None:
+    # Compare estimated salary to bank balance to see if there"s a correlation.
     # Note: Group the balance by $20,000s to lower the number of values on the x-axis
     barplot_data = df.copy()
-    barplot_data['estimated_salary'] = barplot_data['estimated_salary'].apply(lambda x: x // const.BALANCE_THRESHOLD)
-    barplot_data['balance'] = barplot_data['balance'].apply(lambda x: x // const.BALANCE_THRESHOLD)
+    barplot_data["estimated_salary"] = barplot_data["estimated_salary"].apply(lambda x: x // BALANCE_THRESHOLD)
+    barplot_data["balance"] = barplot_data["balance"].apply(lambda x: x // BALANCE_THRESHOLD)
 
     # Call stacked barplot with the modified DataFrame
-    stacked_barplot(barplot_data, 'estimated_salary', 'balance')
+    stacked_barplot(barplot_data, "estimated_salary", "balance")
 
 
 def show_plot_distributions(df: pd.DataFrame):
@@ -73,24 +96,24 @@ def show_plot_distributions(df: pd.DataFrame):
     :return:
     """
     data_columns = [
-        'estimated_salary',
-        'balance',
-        'age',
-        'gender',
-        'tenure',
-        'is_active_member',
-        'num_of_products',
-        'credit_score',
-        'geography',
-        'has_cr_card',
+        "estimated_salary",
+        "balance",
+        "age",
+        "gender",
+        "tenure",
+        "is_active_member",
+        "num_of_products",
+        "credit_score",
+        "geography",
+        "has_cr_card",
     ]
 
     # Compare column to whether they (customer) exited (the program).
     for col_name in data_columns:
-        distribution_plot_wrt_target(df, col_name, 'exited')
+        distribution_plot_wrt_target(df, col_name, TARGET_COL)
 
     # Compare Number of Products for customers with a stacked barplot.
-    stacked_barplot(df, 'num_of_products', 'exited')
+    stacked_barplot(df, "num_of_products", TARGET_COL)
 
 
 def plot_training_history(history):
@@ -100,26 +123,26 @@ def plot_training_history(history):
     # Accuracy
     plt.figure(figsize=(12, 4))
     plt.subplot(1, 2, 1)
-    plt.plot(history.history['accuracy'], label='Train Accuracy')
-    plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
-    plt.title('Model Accuracy')
-    plt.ylabel('Accuracy')
-    plt.xlabel('Epoch')
+    plt.plot(history.history["accuracy"], label="Train Accuracy")
+    plt.plot(history.history["val_accuracy"], label="Validation Accuracy")
+    plt.title("Model Accuracy")
+    plt.ylabel("Accuracy")
+    plt.xlabel("Epoch")
     plt.legend()
 
     # Loss
     plt.subplot(1, 2, 2)
-    plt.plot(history.history['loss'], label='Train Loss')
-    plt.plot(history.history['val_loss'], label='Validation Loss')
-    plt.title('Model Loss')
-    plt.ylabel('Loss')
-    plt.xlabel('Epoch')
+    plt.plot(history.history["loss"], label="Train Loss")
+    plt.plot(history.history["val_loss"], label="Validation Loss")
+    plt.title("Model Loss")
+    plt.ylabel("Loss")
+    plt.xlabel("Epoch")
     plt.legend()
     
     plt.show()
 
 # Define plot to determine model performance
-def plot_model_performance(mod_hist: History, label: str, title: str = '') -> None:
+def plot_model_performance(mod_hist: History, label: str, title: str = "") -> None:
 
     """
     Function to plot loss/accuracy
@@ -128,17 +151,17 @@ def plot_model_performance(mod_hist: History, label: str, title: str = '') -> No
     label: can be one of Loss or Accuracy
     """
 
-    fig, ax = plt.subplots() # Creating a subplot with a figure and axes.
+    fig, _ = plt.subplots() # Creating a subplot with a figure and axes.
     plt.plot(mod_hist.history[label]) # Plotting the train accuracy or train loss
-    plt.plot(mod_hist.history['val_'+label.lower()]) # Plotting the validation accuracy or validation loss
+    plt.plot(mod_hist.history["val_"+label.lower()]) # Plotting the validation accuracy or validation loss
 
-    plt.title(f'{title.title()} Model: {label.title()}') # Defining the title of the plot.
+    plt.title(f"{title.title()} Model: {label.title()}") # Defining the title of the plot.
     plt.ylabel(label.capitalize()) # Capitalizing the first letter.
-    plt.xlabel('Epochs') # Defining the label for the x-axis.
-    fig.legend(['Train', 'Validation'], loc="outside right upper") # Defining the legend, loc controls the position of the legend.
+    plt.xlabel("Epochs") # Defining the label for the x-axis.
+    fig.legend(["Train", "Validation"], loc="outside right upper") # Defining the legend, loc controls the position of the legend.
 
 # Define labeled barplot.
-def labeled_barplot(data: pd.DataFrame, feature:str, perc:bool=False, n=None) -> None:
+def labeled_barplot(data: pd.DataFrame, feature:str, perc:bool=False, fig_size_count:int=0) -> None:
     """
     Barplot with percentage at the top
 
@@ -147,14 +170,15 @@ def labeled_barplot(data: pd.DataFrame, feature:str, perc:bool=False, n=None) ->
     perc: whether to display percentages instead of count
     n: displays the top n category levels
     """
+    title = f"Labeled Bar Plot: {feature.title()}"
 
     total = len(data[feature])  # length of the column
     count = data[feature].nunique()
 
-    if n is None:
-        plt.figure(figsize=(count + 1, 5))
+    if fig_size_count == 0:
+        plt.figure(num=title, figsize=(count + 1, 5))
     else:
-        plt.figure(figsize=(n + 1, 5))
+        plt.figure(num=title, figsize=(fig_size_count + 1, 5))
 
     plt.xticks(rotation=90, fontsize=15)
     ax = sns.countplot(
@@ -165,7 +189,7 @@ def labeled_barplot(data: pd.DataFrame, feature:str, perc:bool=False, n=None) ->
     )
 
     for p in ax.patches:
-        if perc == True:
+        if perc:
             label = "{:.1f}%".format(
                 100 * p.get_height() / total
             )
@@ -243,7 +267,7 @@ def stacked_barplot(data: pd.DataFrame, predictor: str, target: str) -> None:
     )
 
     print(tab1)
-    print("-" * 120)
+    print("-" * PEP8_LINE_LEN)
 
     tab = pd.crosstab(data[predictor], data[target], normalize="index").sort_values(
         by=sorter, ascending=False
@@ -261,7 +285,7 @@ def stacked_barplot(data: pd.DataFrame, predictor: str, target: str) -> None:
 def distribution_plot_wrt_target(data: pd.DataFrame, predictor: str, target: str) -> None:
 
     # Create heatmaps to compare two columns: scatter plots, correlation coefficients, cross-tabulation, pair plot, etc
-    fig, axs = plt.subplots(2, 2, figsize=(12, 10))
+    _, axs = plt.subplots(2, 2, figsize=(12, 10))
 
     target_uniq = data[target].unique()
 
@@ -300,17 +324,44 @@ def distribution_plot_wrt_target(data: pd.DataFrame, predictor: str, target: str
     plt.show()
 
 
-def show_correlation_matrix(df: pd.DataFrame):
+def show_correlation_matrix(df: pd.DataFrame) -> None:
 
     # Exclude columns row_number, customer_id and surname as they are not needed for the matrix.
     corr_data = df.copy()
 
     for col in corr_data.columns:
-        new_col_name = col.replace('_', ' ').title()
+        new_col_name = col.replace("_", " ").title()
         corr_data[new_col_name] = corr_data[col]
         corr_data.drop(columns=col, inplace=True)
 
-    plt.figure(figsize=(15, 7))
-    sns.heatmap(corr_data.corr(numeric_only = True), annot=True, vmin=-1, vmax=1, fmt=".2f", cmap='Spectral')
-    plt.title('Correlation Matrix of Bank Customer Churn')
+    title = "Correlation Matrix of Bank Customer Churn"
+
+    plt.figure(num=f"{title}", figsize=(15, 7))
+    sns.heatmap(corr_data.corr(numeric_only = True), annot=True, vmin=-1, vmax=1, fmt=".2f", cmap="Spectral")
+    plt.title(title)
     plt.show()
+
+
+def model_performance_classification(mod: Sequential, predictors: pd.DataFrame, target: pd.Series, threshold:float=PREDICTION_PROB_THRESHOLD) -> pd.DataFrame:
+
+    """
+    Function to compute different metrics to check classification model performance
+    model: classifier
+    predictors: independent variables
+    target: target variable
+    threshold: threshold for classification
+    """
+
+    # Checking which probabilities are greater than a threshold
+    pred = mod.predict(predictors) > threshold
+
+    accuracy = accuracy_score(target, pred)
+    precision = precision_score(target, pred, average="weighted")
+    recall = recall_score(target, pred, average="weighted")
+    f1 = f1_score(target, pred, average="weighted")
+
+    return pd.DataFrame({"Accuracy": [accuracy], "Precision": [precision], "Recall": [recall], "F1": [f1]})
+
+def show_classification_report(y_test, y_pred) -> None:
+    print(f"y_test: {type(y_test)}, y_pred: {type(y_pred)}")
+    print(classification_report(y_test, y_pred))

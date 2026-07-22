@@ -137,7 +137,7 @@ warnings.filterwarnings("ignore")
 #  CONSTANTS
 # ==================================
 
-FILE_NAME = 'sample_data.csv'
+FILE_NAME = 'source_data.csv'
 SOURCE_PATH = ''
 CSV_FILE = SOURCE_PATH + FILE_NAME
 
@@ -149,7 +149,7 @@ EPOCH_CNT = 100
 LEARNING_RATE = 0.001
 MSEC = 1000
 NEURON_CNT = 64
-DEFAULT_NEURON_CNT = 32
+NEURON_DEFAULT_CNT = 32
 SECS_IN_MIN = 60
 SEED = 42 # Hard coded Seed value for random state
 
@@ -1124,14 +1124,14 @@ sgd_model = Sequential()
 sgd_model.add(Dense(NEURON_CNT, activation='relu', kernel_initializer='he_uniform', input_dim=FEATURE_CNT))
 
 # Adding the first hidden layer with 32 neurons, relu as activation function and, he_uniform as weight initializer
-sgd_model.add(Dense(DEFAULT_NEURON_CNT, activation='relu', kernel_initializer='he_uniform'))
+sgd_model.add(Dense(NEURON_DEFAULT_CNT, activation='relu', kernel_initializer='he_uniform'))
 
 # Adding the second hidden layer with 32 neurons, relu as activation function and, he_uniform as weight initializer
-sgd_model.add(Dense(DEFAULT_NEURON_CNT, activation='relu', kernel_initializer='he_uniform'))
+sgd_model.add(Dense(NEURON_DEFAULT_CNT, activation='relu', kernel_initializer='he_uniform'))
 
 # Adding the output layer with one neuron and sigmoid as activation.  This squashes the output to a probability between 0 and 1, which is necessary for classification.
-#sgd_model.add(Dense(1, activation='linear'))
-sgd_model.add(Dense(1, activation='sigmoid'))
+#sgd_model.add(Dense(NEURON_SINGLE_CNT, activation='linear'))
+sgd_model.add(Dense(NEURON_SINGLE_CNT, activation='sigmoid'))
 
 
 # In[ ]:
@@ -1289,8 +1289,8 @@ FEATURE_CNT = X_train.shape[1] # value = 11
 # Build the Neural Network
 adam_model = Sequential()
 adam_model.add(Dense(NEURON_CNT, activation='relu', input_dim=FEATURE_CNT))  # First hidden layer
-adam_model.add(Dense(DEFAULT_NEURON_CNT, activation='relu'))  # Second hidden layer
-adam_model.add(Dense(1, activation='sigmoid'))  # Output layer for binary classification
+adam_model.add(Dense(NEURON_DEFAULT_CNT, activation='relu'))  # Second hidden layer
+adam_model.add(Dense(NEURON_SINGLE_CNT, activation='sigmoid'))  # Output layer for binary classification
 
 
 # In[ ]:
@@ -1430,9 +1430,9 @@ adam_drop_model = Sequential()
 # Add layers using .add()
 adam_drop_model.add(Dense(NEURON_CNT, activation='relu', kernel_initializer='he_uniform', input_dim=FEATURE_CNT))  # First hidden layer
 adam_drop_model.add(Dropout(DROPOUT_RATE))  # Dropout with 25% rate
-adam_drop_model.add(Dense(DEFAULT_NEURON_CNT, activation='relu', kernel_initializer='he_uniform'))  # Second hidden layer
+adam_drop_model.add(Dense(NEURON_DEFAULT_CNT, activation='relu', kernel_initializer='he_uniform'))  # Second hidden layer
 adam_drop_model.add(Dropout(DROPOUT_RATE))  # Dropout with 25% rate
-adam_drop_model.add(Dense(1, activation='sigmoid'))  # Output layer for binary classification
+adam_drop_model.add(Dense(NEURON_SINGLE_CNT, activation='sigmoid'))  # Output layer for binary classification
 
 
 # In[ ]:
@@ -1576,8 +1576,8 @@ sgd_smote_model = Sequential()
 
 # Add layers using .add()
 sgd_smote_model.add(Dense(NEURON_CNT, activation='relu', kernel_initializer='he_uniform', input_dim=FEATURE_CNT))  # First hidden layer
-sgd_smote_model.add(Dense(DEFAULT_NEURON_CNT, kernel_initializer='he_uniform', activation='relu'))  # Second hidden layer
-sgd_smote_model.add(Dense(1, activation='sigmoid'))  # Output layer for binary classification
+sgd_smote_model.add(Dense(NEURON_DEFAULT_CNT, kernel_initializer='he_uniform', activation='relu'))  # Second hidden layer
+sgd_smote_model.add(Dense(NEURON_SINGLE_CNT, activation='sigmoid'))  # Output layer for binary classification
 
 
 # In[ ]:
@@ -1725,8 +1725,8 @@ adam_smote_bal_model = Sequential()
 
 # Add layers using .add()
 adam_smote_bal_model.add(Dense(NEURON_CNT, activation='relu', kernel_initializer='he_uniform', input_dim=FEATURE_CNT))  # First hidden layer
-adam_smote_bal_model.add(Dense(DEFAULT_NEURON_CNT, activation='relu', kernel_initializer='he_uniform'))  # Second hidden layer
-adam_smote_bal_model.add(Dense(1, activation='sigmoid'))  # Output layer with sigmoid for binary classification
+adam_smote_bal_model.add(Dense(NEURON_DEFAULT_CNT, activation='relu', kernel_initializer='he_uniform'))  # Second hidden layer
+adam_smote_bal_model.add(Dense(NEURON_SINGLE_CNT, activation='sigmoid'))  # Output layer with sigmoid for binary classification
 
 
 # In[ ]:
@@ -1853,11 +1853,11 @@ adam_drop_smote_bal_model = Sequential()
 # Add layers using .add()
 adam_drop_smote_bal_model.add(Dense(NEURON_CNT, activation='relu', input_shape=(FEATURE_CNT,)))  # First hidden layer
 adam_drop_smote_bal_model.add(Dropout(DROPOUT_SMOTE_RATE))  # Dropout with 30% rate
-adam_drop_smote_bal_model.add(Dense(DEFAULT_NEURON_CNT, activation='relu'))  # Second hidden layer
+adam_drop_smote_bal_model.add(Dense(NEURON_DEFAULT_CNT, activation='relu'))  # Second hidden layer
 adam_drop_smote_bal_model.add(Dropout(DROPOUT_SMOTE_RATE))  # Dropout with 30% rate
 
 # Output layer for binary classification
-adam_drop_smote_bal_model.add(Dense(1, activation='sigmoid'))  # Output layer with sigmoid for binary classification
+adam_drop_smote_bal_model.add(Dense(NEURON_SINGLE_CNT, activation='sigmoid'))  # Output layer with sigmoid for binary classification
 
 
 # In[ ]:

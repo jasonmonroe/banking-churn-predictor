@@ -135,14 +135,14 @@ class ModelBuilder:
         model = self.init_model(feature_cnt)
     
         # Adding the first hidden layer with 32 neurons, relu as activation function and, he_uniform as weight initializer
-        model.add(Dense(const.DEFAULT_NEURON_CNT, activation='relu', kernel_initializer='he_uniform'))
+        model.add(Dense(const.NEURON_DEFAULT_CNT, activation='relu', kernel_initializer='he_uniform'))
     
         # Adding the second hidden layer with 32 neurons, relu as activation function and, he_uniform as weight initializer
-        model.add(Dense(const.DEFAULT_NEURON_CNT, activation='relu', kernel_initializer='he_uniform'))
+        model.add(Dense(const.NEURON_DEFAULT_CNT, activation='relu', kernel_initializer='he_uniform'))
     
         # Adding the output layer with one neuron and sigmoid as activation.  This squashes the output to a probability 
         # between 0 and 1, which is necessary for classification.
-        model.add(Dense(1, activation='sigmoid'))
+        model.add(Dense(NEURON_SINGLE_CNT, activation='sigmoid'))
     
         # Output is the model summary from Keras/TensorFlow.
         model.summary()
@@ -155,8 +155,8 @@ class ModelBuilder:
     def create_adam_model(self, feature_cnt: int) -> Sequential:
         adam_model = Sequential()
         adam_model.add(Dense(const.NEURON_CNT, activation='relu', input_dim=feature_cnt))  # First hidden layer
-        adam_model.add(Dense(const.DEFAULT_NEURON_CNT, activation='relu'))  # Second hidden layer
-        adam_model.add(Dense(1, activation='sigmoid'))  # Output layer for binary classification
+        adam_model.add(Dense(const.NEURON_DEFAULT_CNT, activation='relu'))  # Second hidden layer
+        adam_model.add(Dense(NEURON_SINGLE_CNT, activation='sigmoid'))  # Output layer for binary classification
         adam_model.summary()
 
         self.model = adam_model
@@ -170,9 +170,9 @@ class ModelBuilder:
         model = self.init_model(feature_cnt)
 
         model.add(Dropout(const.DROPOUT_RATE))  # Dropout with 25% rate
-        model.add(Dense(const.DEFAULT_NEURON_CNT, activation='relu', kernel_initializer='he_uniform'))  # Second hidden layer
+        model.add(Dense(const.NEURON_DEFAULT_CNT, activation='relu', kernel_initializer='he_uniform'))  # Second hidden layer
         model.add(Dropout(const.DROPOUT_RATE))  # Dropout with 25% rate
-        model.add(Dense(1, activation='sigmoid'))  # Output layer for binary classification
+        model.add(Dense(NEURON_SINGLE_CNT, activation='sigmoid'))  # Output layer for binary classification
         model.summary()
         self.model = model
 
@@ -187,8 +187,8 @@ class ModelBuilder:
 
         model = self.init_model(feature_cnt)
 
-        model.add(Dense(const.DEFAULT_NEURON_CNT, kernel_initializer='he_uniform', activation='relu'))  # Second hidden layer
-        model.add(Dense(1, activation='sigmoid'))  # Output layer for binary classification
+        model.add(Dense(const.NEURON_DEFAULT_CNT, kernel_initializer='he_uniform', activation='relu'))  # Second hidden layer
+        model.add(Dense(NEURON_SINGLE_CNT, activation='sigmoid'))  # Output layer for binary classification
         model.summary()
         self.model = model
 
@@ -198,8 +198,8 @@ class ModelBuilder:
         # Build the Neural Network
         model = self.init_model(feature_cnt)
 
-        model.add(Dense(const.DEFAULT_NEURON_CNT, activation='relu', kernel_initializer='he_uniform'))  # Second hidden layer
-        model.add(Dense(1, activation='sigmoid'))
+        model.add(Dense(const.NEURON_DEFAULT_CNT, activation='relu', kernel_initializer='he_uniform'))  # Second hidden layer
+        model.add(Dense(NEURON_SINGLE_CNT, activation='sigmoid'))
         model.summary()
         self.model = model
 
@@ -210,11 +210,11 @@ class ModelBuilder:
         model = Sequential()
         model.add(Dense(const.NEURON_CNT, activation='relu', input_shape=feature_cnt))  # First hidden layer
         model.add(Dropout(const.DROPOUT_SMOTE_RATE))  # Dropout with 30% rate
-        model.add(Dense(const.DEFAULT_NEURON_CNT, activation='relu'))  # Second hidden layer
+        model.add(Dense(const.NEURON_DEFAULT_CNT, activation='relu'))  # Second hidden layer
         model.add(Dropout(const.DROPOUT_SMOTE_RATE))  # Dropout with 30% rate
 
         # Output layer for binary classification
-        model.add(Dense(1, activation='sigmoid'))  # Output layer with sigmoid for binary classification
+        model.add(Dense(NEURON_SINGLE_CNT, activation='sigmoid'))  # Output layer with sigmoid for binary classification
         model.summary()
         self.model = model
 
