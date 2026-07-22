@@ -22,7 +22,7 @@ class SmoteModel:
         self.x, self.y = self._fit(dataset)
 
         # Check the shapes
-        print(f"Shape of X_smote: {self.x.shape}")
+        print(f"Shape of x_smote: {self.x.shape}")
         print(f"Shape of y_smote: {self.y.shape}")
 
     def _create(self) -> SMOTE:

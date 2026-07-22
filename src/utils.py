@@ -123,6 +123,13 @@ def _create_subtitle_banner(text: str | list, center_text: bool=False) -> None:
     return None
 
 def _get_wrapped_lines(text: str | list, max_line_len: int) -> list:
+    """
+    Gets all wrapped lines and formats them accordingly.
+
+    :param text:
+    :param max_line_len:
+    :return:
+    """
     wrapped_lines = []
 
     if isinstance(text, list):

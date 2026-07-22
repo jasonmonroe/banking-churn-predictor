@@ -249,3 +249,6 @@ class BaseModel(ABC):
         # Plot Model Performance
         plot_model_performance(history, "accuracy", self.title)
         plot_model_performance(history, "loss", self.title)
+
+
+

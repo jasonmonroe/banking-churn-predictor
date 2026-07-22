@@ -65,7 +65,7 @@ from src.eda import (
 )
 
 
-def run_data_pipeline(args: dict) -> dict:
+def run_data_pipeline(args: dict) -> tuple[dict, pd.DataFrame]:
     # Seed data with random integer
     np.random.seed(SEED)
     random.seed(SEED)
@@ -94,50 +94,132 @@ def run_data_pipeline(args: dict) -> dict:
 
     dataset = data_handler.get(df)
 
-    return dataset
+    return dataset, data
 
 def run_model_pipeline(args: dict, dataset: dict) -> list:
+    """
+    Return all models requested in the command line.
+    :param args:
+    :param dataset:
+    :return:
+    """
+
+    print("\n# --- LOADING SMOTE MODEL --- #")
+
+    smote_model = SmoteModel(dataset)
+    x_smote, y_smote = smote_model.x, smote_model.y
 
     models = []
 
-    # Return all models requested in the command line.
-
+    # 1) Building Neural Network Model (Stochastic gradient descent)
     if args.get("all") or args.get("model:sgd"):
-        pass
+        sgd_model = SGDModel(dataset)
+        sgd_model.run()
+        models.append(sgd_model)
+
+    # 2) Building Neural Network Model w/ Adam Optimizer
     if args.get("all") or args.get("model:adam"):
-        pass
+        adam_model = AdamModel(dataset)
+        adam_model.run()
+        models.append(adam_model)
 
+    # 3) Build Adam Optimized Model with Dropout
     if args.get("all") or args.get("model:adam-dropout"):
-        pass
+        adam_dropout_model = AdamDropoutModel(dataset)
+        adam_dropout_model.run()
+        models.append(adam_dropout_model)
+
+    # --- SMOTE Models --- #
+
+    # 4) Build Neural Network (SGD with SMOTE)
     if args.get("all") or args.get("model:sgd-smote"):
-        pass
+        sgd_smote_model = SGDSmoteModel(dataset)
+        sgd_smote_model.run(x_smote, y_smote)
+
+        # Generate SMOTE Classification Report
+        show_banner(sgd_smote_model.title, "Classification Report")
+        show_classification_report(sgd_smote_model.y_test, sgd_smote_model.y_predictor)
+
+        models.append(sgd_smote_model)
+
+    # 5) Build Neural Network (Adam with SMOTE)
     if args.get("all") or args.get("model:adam-smote"):
-        pass
+        adam_smote_model = AdamSmoteModel(dataset)
+        adam_smote_model.run(x_smote, y_smote)
+        models.append(adam_smote_model)
+
+    # 6) Build Neural Network Adam and Dropout with SMOTE
     if args.get("all") or args.get("model:adam-smote-dropout"):
-        pass
+        adam_smote_dropout_model = AdamSmoteDropoutModel(dataset)
+        adam_smote_dropout_model.run()
 
+        print(f"# --- Run {adam_smote_dropout_model.title} it again with SMOTE data --- #")
+        adam_smote_dropout_model.run(x_smote, y_smote)
 
+        models.append(adam_smote_dropout_model)
 
     return models
 
-def run_model_comparison_pipeline(args: dict, models: list) -> tuple[dict, dict]:
-    comparison_models = {}
+def run_model_comparison_pipeline(args: dict, models: list) -> tuple[pd.DataFrame, pd.DataFrame]:
 
     # There must be at least two models to run a comparison.
 
     if len(models) > 1:
-        pass
+        model_comparison_train_perfs_matrix, model_comparison_val_perfs_matrix = ModelPerformance.create_comparisons(models)
+
+        # --- Display Comparisons --- #
+        show_banner("Model Training Performances".upper(), [model_comparison_train_perfs_matrix])
+        show_banner("Model Validation Performances".upper(), [model_comparison_val_perfs_matrix])
+
+        return model_comparison_train_perfs_matrix, model_comparison_val_perfs_matrix
+
     else:
-        print("⚠ Warning: A minimum of two models are requred to make a comparison.")
-        return {}, {}
+        print("⚠ Warning: A minimum of two models are required to make a comparison.")
+        return pd.DataFrame(), pd.DataFrame()
+
+def run_customer_churn_results(final_model, dataset: dict, raw_csv_data: pd.DataFrame):
+
+    subtitles = ["Will the customer leave the bank within the next six months❓"]
+
+    predictions = None
+    show_banner("BANK CHURN PREDICTOR RESULTS", subtitles)
+
+
+def run_customer_churn_results_orig(models: list, best_model_name: str, dataset: dict):
+    subtitles = ["Will the customer leave the bank within the next six months❓"]
+    show_banner("BANK CHURN PREDICTOR RESULTS", subtitles)
+
+    # 1. Find the best model object from our list
+    best_model_obj = next((m for m in models if m.title == best_model_name), models[0])
+    
+    # 2. Use the test data (or full data) for inference
+    # We use x_test_norm because it is already scaled and ready for the Neural Network
+    predictions = best_model_obj.model.predict(dataset["x_test_norm"], verbose=0)
+    
+    # 3. Zip predictions with the actual y values or IDs to show results
+    # Note: In a production scenario, you'd map these back to the 'customer_id' column
+    results = []
+    for i, prob in enumerate(predictions[:10]): # Showing first 10 for clarity
+        is_churning = prob[0] > PREDICTION_PROB_THRESHOLD
+        status = "❌ LEAVING" if is_churning else "✅ STAYING"
+        results.append(f"Customer Index {i}: Probability: {prob[0]:.4f} -> {status}")
+
+    show_banner("Individual Predictions (Sample)", results)
+
+    # Pick best model by test data.
+
+    # Evaluate F1-Score and Recall on the test set.
+
+
+    show_banner("BANK CHURN PREDICTOR RESULTS", subtitles)
 
 def run_main_pipeline(args: dict):
 
-    dataset = run_data_pipeline(args)
+    dataset, raw_csv_data = run_data_pipeline(args)
 
     #print(f"dataset[x_train]=dataset{dataset['x_train']}")
     #print(f"dataset[x_train_norm]=dataset{dataset['x_train_norm']}")
-    import sys
+    #import sys
     #sys.exit(0)
 
     # --- Build & Train Models --- #
@@ -157,45 +239,69 @@ def run_main_pipeline(args: dict):
 
     models = run_model_pipeline(args, dataset)
 
-    # 1) Building Neural Network Model (Stochastic gradient descent)
-    sgd_model = SGDModel(dataset)
-    #sgd_model.run()
 
-    #sys.exit(0)
+    train_matrix, val_matrix = run_model_comparison_pipeline(args, models)
 
-    # 2) Building Neural Network Model w/ Adam Optimizer
-    adam_model = AdamModel(dataset)
-    #adam_model.run()
+    # ---- Get Best Model ---- #
+    """
+    •
+What it does: It identifies the "Development Champion." It looks at the models' performance during the training phase to see which architecture (Adam, SGD, SMOTE, etc.) handled the training-to-validation transition best.
+•
+How it got the results: It uses the train_matrix and val_matrix generated by run_model_comparison_pipeline. These matrices contain metrics recorded during the training process (the .fit() stage).
+•
+Purpose: It helps you detect overfitting. If a model has a perfect score in train_matrix but a poor score in val_matrix, best_model logic (as we refactored in model_perf.py) would flag that model as unreliable.
+    """
+    best_model = ModelPerformance.best_model(train_matrix, val_matrix)
+    print(f"final results type = {type(best_model)}")
 
-    # 3) Build Adam Optimized Model with Dropout
-    adam_dropout_model = AdamDropoutModel(dataset)
-    #adam_dropout_model.run()
+    show_banner("Best Model", [f"🏆 {best_model}"], center_subtitle_text=True)
 
-    print("\n# --- LOADING SMOTE MODELS --- #")
-    smote_model = SmoteModel(dataset)
-    x_smote, y_smote = smote_model.x, smote_model.y
-    #
-    #x_smote=(12740, 11), y_smote=(12740,)
 
-    # 4) Build Neural Network (SGD with SMOTE)
-    sgd_smote_model = SGDSmoteModel(dataset)
-    #sgd_smote_model.run(x_smote, y_smote)
+    # --- Final Test Evaluation --- #
+    # This is the Real World check using the test data
+    # Each model inherits the base class that has the entire dataset.  Test data is unused at this point and
+    # will be the same for each model.
+    test_model_perfs = []
+    for test_model in models:
+        test_model.model_perf.get(
+            f"{test_model.title} (Test Set)",
+            test_model.model,
+            test_model.x_test_norm,
+            test_model.y_test
+        )
 
-    # 5) Generate SMOTE Classification Report
-    #show_banner(sgd_smote_model.title, "Classification Report")
-    #show_classification_report(sgd_smote_model.y_test, sgd_smote_model.y_predictor)
+        #line = f"{model.title}: {model.model_perf.data}"
+        test_model_perfs.append(test_model.model_perf.data)
 
-    # 6) Build Neural Network (Adam with SMOTE)
-    adam_smote_model = AdamSmoteModel(dataset)
-    #adam_smote_model.run(x_smote, y_smote)
+        #evals.append(line)
 
-    # Build Neural Network Adam and Dropout with SMOTE
-    adam_smote_dropout_model = AdamSmoteDropoutModel(dataset)
-    adam_smote_dropout_model.run()
-    print(f"# --- Run {adam_smote_dropout_model.title} it again with SMOTE data --- #")
-    adam_smote_dropout_model.run(x_smote, y_smote)
+    """
+    
+What it does: It identifies the "Real-World Champion." This is the model the bank would actually put into production. It evaluates the models on data they have never seen before—not even during the validation tuning.
+•
+How it got the results:
+i.
+The code loops through each model in your models list.
+ii.
+It calls test_model.model_perf.get() using the x_test_norm and y_test hold-out data.
+iii.
+It collects these "final exam" scores into a list called test_model_perfs.
+iv.
+ModelPerformance.final_model() then aggregates these scores to pick the ultimate winner based on the highest F1-Score on that unseen data.
+•
+Purpose: This is the most honest metric. A model might "cheat" or overfit the validation data if you tune it too much, but it can't "cheat" the test set.
+    """
 
-    model_comparison_train, model_comparison_val = run_model_comparison_pipeline(args, models)
+    final_model = ModelPerformance.final_model(test_model_perfs)
+    show_banner("Final Evaluation", [final_model])
+
+
+    run_customer_churn_results(final_model, dataset, raw_csv_data)
+
+
+
+
+    sys.exit(0)
 
 
 
@@ -273,7 +379,7 @@ def run_main_pipeline(args: dict):
     # utilize it?
 
 
-
+# @TODO - old and needs to be deleted
 def main():
     warnings.filterwarnings('ignore')
 
