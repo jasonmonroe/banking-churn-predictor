@@ -6,7 +6,7 @@ from tensorflow.keras.layers import BatchNormalization, Dense, Dropout
 
 # Local Libraries
 from models.base_model import BaseModel
-from src.constants import NEURON_DEFAULT_CNT
+from src.constants import NEURON_DEFAULT_CNT, NEURON_SINGLE_CNT
 
 
 class SGDModel(BaseModel):

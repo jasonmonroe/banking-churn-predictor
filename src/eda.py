@@ -1,15 +1,24 @@
 # src/eda.py
-# Perform Univariate Analysis by creating box plots, histograms, density plots for each column.
+
+"""
++---------------------------------------------------------------------------+
+|                       EXPLORATORY DATA ANALYSIS                           |
++---------------------------------------------------------------------------+
+Perform Univariate Analysis by creating box plots, histograms, density plots
+for each column.
+"""
 
 # Python Libraries
 
 # Vendor Libraries
+import matplotlib
+#matplotlib.use('TkAgg')
+matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import seaborn as sns
-import tensorflow as tf
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, History
 from sklearn.metrics import (
     accuracy_score,
     classification_report,
@@ -22,14 +31,21 @@ from sklearn.metrics import (
     r2_score,
     recall_score,
 )
+from tensorflow.keras.callbacks import History
 from tensorflow.keras.models import Sequential
 
-# Local Libraries
-from src.constants import TARGET_COL, BALANCE_THRESHOLD, PREDICTION_PROB_THRESHOLD, PEP8_LINE_LEN
 
-""" 
-Perform Univariate Analysis by creating box plots, histograms, density plots for each column.
-"""
+
+# Local Libraries
+from src.constants import (
+    BALANCE_THRESHOLD,
+    PEP8_LINE_LEN,
+    PREDICTION_PROB_THRESHOLD,
+    TARGET_COL,
+)
+
+
+
 
 # @TODO - defunct
 def observe_data(data: pd.DataFrame):
@@ -115,17 +131,18 @@ def show_plot_distributions(df: pd.DataFrame):
     # Compare Number of Products for customers with a stacked barplot.
     stacked_barplot(df, "num_of_products", TARGET_COL)
 
-
+#@TODO - where is this being used?
 def plot_training_history(history):
     """
     Plots the training and validation accuracy and loss.
     """
     # Accuracy
-    plt.figure(figsize=(12, 4))
+    title = "Model Accuracy"
+    plt.figure(num=title, figsize=(12, 4))
     plt.subplot(1, 2, 1)
     plt.plot(history.history["accuracy"], label="Train Accuracy")
     plt.plot(history.history["val_accuracy"], label="Validation Accuracy")
-    plt.title("Model Accuracy")
+    plt.title(title)
     plt.ylabel("Accuracy")
     plt.xlabel("Epoch")
     plt.legend()
@@ -150,15 +167,22 @@ def plot_model_performance(mod_hist: History, label: str, title: str = "") -> No
     mod_hist: an object which stores the metrics and losses.
     label: can be one of Loss or Accuracy
     """
+    # Standardize label to lowercase to match Keras history keys
+    metric_name = label.lower()
+    val_metric_name = f"val_{metric_name}"
 
     fig, _ = plt.subplots() # Creating a subplot with a figure and axes.
-    plt.plot(mod_hist.history[label]) # Plotting the train accuracy or train loss
-    plt.plot(mod_hist.history["val_"+label.lower()]) # Plotting the validation accuracy or validation loss
+    
+    if metric_name in mod_hist.history:
+        plt.plot(mod_hist.history[metric_name], label="Train")
+    if val_metric_name in mod_hist.history:
+        plt.plot(mod_hist.history[val_metric_name], label="Validation")
 
     plt.title(f"{title.title()} Model: {label.title()}") # Defining the title of the plot.
     plt.ylabel(label.capitalize()) # Capitalizing the first letter.
     plt.xlabel("Epochs") # Defining the label for the x-axis.
-    fig.legend(["Train", "Validation"], loc="outside right upper") # Defining the legend, loc controls the position of the legend.
+    plt.legend(loc="upper right")
+    plt.show()
 
 # Define labeled barplot.
 def labeled_barplot(data: pd.DataFrame, feature:str, perc:bool=False, fig_size_count:int=0) -> None:
@@ -171,21 +195,19 @@ def labeled_barplot(data: pd.DataFrame, feature:str, perc:bool=False, fig_size_c
     n: displays the top n category levels
     """
     title = f"Labeled Bar Plot: {feature.title()}"
-
     total = len(data[feature])  # length of the column
-    count = data[feature].nunique()
 
     if fig_size_count == 0:
-        plt.figure(num=title, figsize=(count + 1, 5))
-    else:
-        plt.figure(num=title, figsize=(fig_size_count + 1, 5))
+        fig_size_count = data[feature].nunique()
+
+    plt.figure(num=title, figsize=(fig_size_count + 1, 5))
 
     plt.xticks(rotation=90, fontsize=15)
     ax = sns.countplot(
         data=data,
         x=feature,
         palette="Paired",
-        order=data[feature].value_counts().index[:n].sort_values(),
+        order=data[feature].value_counts().index[:fig_size_count].sort_values(),
     )
 
     for p in ax.patches:
@@ -221,7 +243,7 @@ def histogram_boxplot(data: pd.DataFrame, feature: str, figsize: tuple=(12, 7), 
     kde: whether to show the density curve (default False)
     bins: number of bins for histogram (default None)
     """
-    f2, (ax_box2, ax_hist2) = plt.subplots(
+    _, (ax_box2, ax_hist2) = plt.subplots(
         nrows=2,  # Number of rows of the subplot grid= 2
         sharex=True,  # x-axis will be shared among all subplots
         gridspec_kw={"height_ratios": (0.25, 0.75)},
@@ -266,7 +288,7 @@ def stacked_barplot(data: pd.DataFrame, predictor: str, target: str) -> None:
         by=sorter, ascending=False
     )
 
-    print(tab1)
+    print(f"line 261-DBG: {tab1}")
     print("-" * PEP8_LINE_LEN)
 
     tab = pd.crosstab(data[predictor], data[target], normalize="index").sort_values(
@@ -362,6 +384,7 @@ def model_performance_classification(mod: Sequential, predictors: pd.DataFrame, 
 
     return pd.DataFrame({"Accuracy": [accuracy], "Precision": [precision], "Recall": [recall], "F1": [f1]})
 
-def show_classification_report(y_test, y_pred) -> None:
+def show_classification_report(y_test, y_pred: np.ndarray) -> None:
     print(f"y_test: {type(y_test)}, y_pred: {type(y_pred)}")
+    # y_test: <class 'pandas.Series'>, y_pred: <class 'numpy.ndarray'>
     print(classification_report(y_test, y_pred))

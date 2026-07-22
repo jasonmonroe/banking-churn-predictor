@@ -39,7 +39,7 @@ def get_time(start_time_float: float) -> str:
 
 
 def show_timer(start_time_int: float) -> None:
-    print(f"Run Time: {get_time(start_time_int)}")
+    print(f"⏰Run Time: {get_time(start_time_int)}\n")
 
 
 def _make_top_btm_line() -> str:
@@ -50,6 +50,12 @@ def _make_top_btm_line() -> str:
 
 
 def _create_title_banner(text: str, center_text: bool=True) -> None:
+    """
+    Creates the Title Banner
+    :param text:
+    :param center_text:
+    :return:
+    """
     open_close_len = 4 # open close of char `+` or `|`
     max_line_len = PEP8_LINE_LEN - open_close_len
 
@@ -79,6 +85,13 @@ def _create_title_banner(text: str, center_text: bool=True) -> None:
 
 
 def _create_subtitle_banner(text: str | list, center_text: bool=False) -> None:
+    """
+    Creates the Subtitle Banner
+    :param text:
+    :param center_text:
+    :return:
+    """
+
     # Reconstructs the guard to safely catch wrong types OR empty values
     if not isinstance(text, (str, list)) or not text:
         return None

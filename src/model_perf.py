@@ -17,17 +17,17 @@ from src.utils import show_banner
 
 class ModelPerformance:
     def __init__(self):
-        self.title = ""
-        self.perf = None
+        self._title = ""
+        self.data = None
 
     def get(self, title: str, model: Sequential, x_data: pd.DataFrame, y_data: pd.Series) -> None:
         # Get Model Performance
-        self.title = title
-        self.perf = model_performance_classification(model, x_data, y_data)
+        self._title = title
+        self.data = model_performance_classification(model, x_data, y_data)
 
     def show(self) -> None:
-        if self.perf is not None:
-            show_banner(f"{self.title} Model Performance", [self.perf])
+        if self.data is not None:
+            show_banner(f"{self._title} Model Performance", [self.data])
         else:
             ValueError("🚩Error: Model Performance has not been run.")
 

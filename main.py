@@ -96,18 +96,40 @@ def run_data_pipeline(args: dict) -> dict:
 
     return dataset
 
-def run_model_pipeline() -> list:
+def run_model_pipeline(args: dict, dataset: dict) -> list:
 
     models = []
 
     # Return all models requested in the command line.
 
+    if args.get("all") or args.get("model:sgd"):
+        pass
+    if args.get("all") or args.get("model:adam"):
+        pass
+
+    if args.get("all") or args.get("model:adam-dropout"):
+        pass
+    if args.get("all") or args.get("model:sgd-smote"):
+        pass
+    if args.get("all") or args.get("model:adam-smote"):
+        pass
+    if args.get("all") or args.get("model:adam-smote-dropout"):
+        pass
+
+
+
     return models
 
-def run_model_comparison_pipeline() -> tuple[dict, dict]:
+def run_model_comparison_pipeline(args: dict, models: list) -> tuple[dict, dict]:
     comparison_models = {}
 
-    return {}, {}
+    # There must be at least two models to run a comparison.
+
+    if len(models) > 1:
+        pass
+    else:
+        print("⚠ Warning: A minimum of two models are requred to make a comparison.")
+        return {}, {}
 
 def run_main_pipeline(args: dict):
 
@@ -133,35 +155,39 @@ def run_main_pipeline(args: dict):
     # Get feature count for model creation
     #feature_cnt = dataset["x_train_norm"].shape[1]
 
-    models = run_model_pipeline()
+    models = run_model_pipeline(args, dataset)
 
     # 1) Building Neural Network Model (Stochastic gradient descent)
     sgd_model = SGDModel(dataset)
-    sgd_model.run()
+    #sgd_model.run()
+
+    #sys.exit(0)
 
     # 2) Building Neural Network Model w/ Adam Optimizer
     adam_model = AdamModel(dataset)
-    adam_model.run()
+    #adam_model.run()
 
     # 3) Build Adam Optimized Model with Dropout
     adam_dropout_model = AdamDropoutModel(dataset)
-    adam_dropout_model.run()
+    #adam_dropout_model.run()
 
     print("\n# --- LOADING SMOTE MODELS --- #")
     smote_model = SmoteModel(dataset)
     x_smote, y_smote = smote_model.x, smote_model.y
+    #
+    #x_smote=(12740, 11), y_smote=(12740,)
 
-    # Build Neural Network (SGD with SMOTE)
+    # 4) Build Neural Network (SGD with SMOTE)
     sgd_smote_model = SGDSmoteModel(dataset)
-    sgd_smote_model.run(x_smote, y_smote)
+    #sgd_smote_model.run(x_smote, y_smote)
 
-    # Generate SMOTE Classification Report
-    show_banner(sgd_smote_model.title, "Classification Report")
-    show_classification_report(sgd_smote_model.y_test, sgd_smote_model.y_predictor)
+    # 5) Generate SMOTE Classification Report
+    #show_banner(sgd_smote_model.title, "Classification Report")
+    #show_classification_report(sgd_smote_model.y_test, sgd_smote_model.y_predictor)
 
-    # Build Neural Network (Adam with SMOTE)
+    # 6) Build Neural Network (Adam with SMOTE)
     adam_smote_model = AdamSmoteModel(dataset)
-    adam_smote_model.run(x_smote, y_smote)
+    #adam_smote_model.run(x_smote, y_smote)
 
     # Build Neural Network Adam and Dropout with SMOTE
     adam_smote_dropout_model = AdamSmoteDropoutModel(dataset)
@@ -169,7 +195,7 @@ def run_main_pipeline(args: dict):
     print(f"# --- Run {adam_smote_dropout_model.title} it again with SMOTE data --- #")
     adam_smote_dropout_model.run(x_smote, y_smote)
 
-    model_comparison_train, model_comparison_val = run_model_comparison_pipeline()
+    model_comparison_train, model_comparison_val = run_model_comparison_pipeline(args, models)
 
 
 
@@ -219,7 +245,8 @@ def run_main_pipeline(args: dict):
         adam_smote_dropout_model.val_perf
     ])
 
-    print(f"type = {type(model_comparison_val_perfs)}")
+    # type = <class 'pandas.DataFrame'>
+    print(f"model_comparison_val_perfs type = {type(model_comparison_val_perfs)}")
 
     #model_comparison_val_perfs_matrix = model_comparison_val_perfs
     #model_comparison_val_perfs_matrix.index = model_comparison_titles
@@ -414,15 +441,24 @@ def _parse_args(command_line_args: list[str]) -> dict:
     Parse command line arguments.
 
     :param command_line_args:
+    :return: dict
+    """
+    args = {arg.strip("--"): (arg in command_line_args) for arg in ARG_PARAMS}
+
+    args["all"] = _check_arg_all(args)
+
+    return args
+
+def _check_arg_all(args: dict) -> bool:
+    """
+    Check to see if any models were called in command line.  If so, turn the all flag to False.
+    If the `all` flag is referenced, override and set all to true.
+    :param args:
     :return:
     """
-    param_args = {arg.strip("--"): (arg in command_line_args) for arg in ARG_PARAMS}
 
-    # If no individual models are referenced in the command line run them all.
-    if not any("model" in arg for arg in param_args.values()):
-        param_args["all"] = True
+    return (not any("model" in key and value == True for key, value in args.items())) or args.get("all")
 
-    return param_args
 
 # --- Start Program --- #
 if __name__ == '__main__':
@@ -433,6 +469,15 @@ if __name__ == '__main__':
     print(f"\n----- ⏱️START RUN ID: {run_id} ⏱️-----")
 
     args = _parse_args(sys.argv[1:])
+    print(f"line 445: args={args}")
+
+    #print(f"line 447: args={args.keys()}")
+    # If no individual models are referenced in the command line run them all.
+
+    #return param_args
+
+    #import sys
+    #sys.exit(0)
     run_main_pipeline(args)
 
     print(f"\n----- ⏱️ END RUN ID: {run_id} ⏱️-----")

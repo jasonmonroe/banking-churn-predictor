@@ -12,6 +12,12 @@ from src.constants import LEARNING_RATE, NEURON_DEFAULT_CNT, NEURON_SINGLE_CNT
 
 
 class AdamModel(BaseModel):
+    """
+    Adam (short for Adaptive Moment Estimation) is not a type of neural network model itself. Instead, it is an
+    advanced optimization algorithm used to train neural networks.
+    Adam solves SGD by automatically calculating a unique, dynamically changing learning rate for every single
+    parameter in your network.
+    """
 
     def __init__(self, dataset: dict) -> None:
         super().__init__(dataset)

@@ -6,7 +6,7 @@ from tensorflow.keras.layers import Dense
 
 # Local Libraries
 from models.base_model import BaseModel
-from src.constants import NEURON_DEFAULT_CNT
+from src.constants import NEURON_DEFAULT_CNT, NEURON_SINGLE_CNT
 
 
 class AdamSmoteModel(BaseModel):

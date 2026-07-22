@@ -14,7 +14,8 @@ from tensorflow.keras import Sequential
 # Local Libraries
 from src.constants import NEURON_CNT, EPOCH_CNT, BATCH_CNT
 from src.eda import model_performance_classification, plot_model_performance
-from src.utils import start_timer, show_banner, show_timer
+from src.utils import start_timer, show_banner, show_timer, get_time
+
 
 class BaseModel(ABC):
     def __init__(self, dataset: dict) -> None:
@@ -25,6 +26,7 @@ class BaseModel(ABC):
         self.title = ""
         self.model = None
         self._optimizer = None
+        self.run_time = ""
 
         self.model_perf = ModelPerformance()
         self.train_perf = None
@@ -49,20 +51,21 @@ class BaseModel(ABC):
 
         # Get feature count for model creation
         self._feature_cnt = self._count_features()
-        print(f"\nFeature Count: {self._feature_cnt}")
+        print(f"\n(Tuple) Feature Count: {self._feature_cnt}")
 
     def _set_attrs(self, dataset) -> None:
         for key, value in dataset.items():
             if hasattr(self, key):
                 setattr(self, key, value)
+                #print(f"key={key}, value={value}")
 
     def _count_features(self) -> int:
-        count = int(self.x_train_norm.shape[1])
+        count = self.x_train_norm.shape[1]
 
         if count == 0:
             raise ValueError("🚩Error: Feature Count cannot be 0. Please check your data.")
 
-        return count
+        return int(count)
 
     @abstractmethod
     def _create(self) -> Sequential:
@@ -111,8 +114,6 @@ class BaseModel(ABC):
 
 
     def _build(self, x_data=None, y_data=None) -> History:
-        print(f"# --- Building {self.title} Model --- #")
-
         start_time = start_timer()
 
         # Get the training data for fitting the model
@@ -133,18 +134,20 @@ class BaseModel(ABC):
         # Evaluate model
         self.evaluate()
 
+        self.run_time = get_time(start_time)
         show_timer(start_time)
 
         # Display Training and Validation results
-        self.model_perf.get(perf_title + "Training", self.model, self.x_train_norm, self.y_train)
-        self.model_perf.show()
-        self.train_perf = self.model_perf.perf
+        self.train_perf = self._run_model_perf(perf_title + "Training", self.x_train_norm, self.y_train)
+        #self.model_perf.get(perf_title + "Training", self.model, self.x_train_norm, self.y_train)
+        #self.model_perf.show()
+        #self.train_perf = self.model_perf.data
 
         #self.model_perf = self._get_model_perf_2(perf_title + "Training", self.x_train_norm, self.y_train)
 
-        self.model_perf.get(perf_title + "Validation", self.x_val_norm, self.y_val)
-        self.model_perf.show()
-        self.val_perf = self.model_perf.perf
+        #self.model_perf.get(perf_title + "Validation", self.model, self.x_val_norm, self.y_val)
+        #self.model_perf.show()
+        self.val_perf = self._run_model_perf(perf_title + "Validation", self.x_val_norm, self.y_val)
 
 
 
@@ -175,9 +178,13 @@ class BaseModel(ABC):
 
         return test_loss, test_accuracy, test_precision, test_recall, test_auc
 
+    def _run_model_perf(self, title: str, x_data: pd.DataFrame, y_data: pd.Series):
+        self.model_perf.get(title, self.model, x_data, y_data)
+        self.model_perf.show()
 
+        return self.model_perf.data
 
-    def _get_train_data(self, x_data: pd.DataFrame, y_data: pd.Series) -> tuple[pd.DataFrame, pd.Series, str]:
+    def _get_train_data(self, x_data: pd.DataFrame | None, y_data: pd.Series | None) -> tuple[pd.DataFrame, pd.Series, str]:
         """
         Get normalized or SMOTE data for model performance.
         :param x_data:
@@ -187,16 +194,16 @@ class BaseModel(ABC):
         print(f"DBG: x_data type ={type(x_data)}, y_data type = {type(y_data)}")
 
         # If smote model, use the smote data
-        perf_title = ""
+        title = self.title + " "
         x_train = self.x_train_norm
         y_train = self.y_train
 
         if x_data is not None and y_data is not None:
-            perf_title = "SMOTE "
+            title = f"{self.title} SMOTE "
             x_train = x_data
             y_train = y_data
 
-        return x_train, y_train, perf_title
+        return x_train, y_train, title
 
     # @TODO - defunct
     def _get_model_perf_2(self, model_title: str, x_data, y_data):
@@ -219,10 +226,20 @@ class BaseModel(ABC):
 
     # @TODO - old version
     def show_model_perf(self, data_type: str, x_data: pd.DataFrame, y_data: pd.Series) -> None:
+        pass
         #self.perf = self._get_model_perf(x_data, y_data)
         #show_banner(f"{self.title} {data_type} Model Performance", [self.perf])
 
     def run(self, x_smote_data=None, y_smote_data=None) -> None:
+        """
+        Run the model to get the training validation performances.
+        Then plot the models performance  based on accuracy and loss.
+
+        :param x_smote_data:
+        :param y_smote_data:
+        :return:
+        """
+        print(f"\n# --- Running {self.title} model --- #\n")
         self._show_summary()
         self._compile()
 

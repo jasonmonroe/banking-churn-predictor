@@ -71,6 +71,14 @@ banking-churn-predictor/
    pip install -r requirements.txt
    ```
 
+4. Just in case you have issues viewing the EDA consoles it's recommended to download Tcl/Tk
+```bash
+brew install python-tk@3.11
+```
+
+ ℹ️ Homebrew's Python installation decouples the GUI framework (Tcl/Tk) from the core runtime to save space. Unless
+ explicitly installed via Homebrew, Python cannot find the graphic components needed to pop open interactive windows.
+
 ## Usage
 
 To run the main pipeline:

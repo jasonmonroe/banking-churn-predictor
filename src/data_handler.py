@@ -98,7 +98,7 @@ class DataHandler:
 
     def get(self, data) -> dict:
 
-        print(f"type = {type(data)}")
+        #print(f"type = {type(data)}")
         # Split data
         dataset = self._split(data)
 
@@ -123,7 +123,7 @@ class DataHandler:
         # Find any missing values
         print(f"Total rows with missing values: {self.data.isnull().sum()}")
 
-    def _split(self, features ) -> dict:
+    def _split(self, features: pd.DataFrame ) -> dict:
 
         # Ensure features is a numpy array for efficient slicing and processing
         #if not isinstance(features, np.ndarray):

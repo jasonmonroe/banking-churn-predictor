@@ -10,17 +10,17 @@
 # ℹ️ Note: If any individual model is referenced the "all" command is automatically set to False!
 ARG_PARAMS = [
     "--all",
-    "--build",  # Build AI Agent
     "--eda",    # Show Exploratory Data Analysis
     "--log",    # Log information
 
     # Models
-    "--model:adam",
-    "--model:adam_d",
-    "--model:adam_smote",
-    "--model:adam_smote_d",
     "--model:sgd",
-    "--model:sgd_smote",
+    "--model:adam",
+    "--model:adam-dropout",
+    "--model:sgd-smote",
+    "--model:adam-smote",
+    "--model:adam-smote-dropout",
+
 ]
 
 # Data Files
