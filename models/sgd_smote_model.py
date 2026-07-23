@@ -29,10 +29,9 @@ class SGDSmoteModel(BaseModel):
         model = super()._create()
 
         model.add(Dense(NEURON_DEFAULT_CNT, kernel_initializer="he_uniform", activation="relu", name="sgd_smote_model_layer_01"))  # Second hidden layer
-        model.add(Dense(NEURON_SINGLE_CNT, activation="sigmoid", name="sgd_smote_model_layer_02"))  # Output layer for binary classification
+        model.add(Dense(NEURON_DEFAULT_CNT, kernel_initializer="he_uniform", activation="relu", name="sgd_smote_model_layer_02"))  # Third hidden layer
+        model.add(Dense(NEURON_SINGLE_CNT, activation="sigmoid", name="sgd_smote_model_layer_03"))  # Output layer for binary classification
 
-        # !
-        model.add(Dense())
         return model
 
     def _get_predictor(self) -> int:

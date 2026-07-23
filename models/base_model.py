@@ -76,7 +76,7 @@ class BaseModel(ABC):
         model = Sequential()
 
         # Adding input layer with 64 neurons, relu as activation function and, he_uniform as weight initializer.
-        model.add(Dense(NEURON_CNT, activation="relu", kernel_initializer="he_uniform", input_dim=self._feature_cnt, name="initial_layer"))
+        model.add(Dense(NEURON_CNT, activation="relu", kernel_initializer="he_uniform", input_dim=self._feature_cnt, name="base_model_layer"))
 
         return model
 
