@@ -9,7 +9,10 @@ architecture and the SGD optimizer with specific learning rate and momentum.
 """
 
 # Third-party Imports
+from typing import Optional, Union
+
 import numpy as np
+import pandas as pd
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.optimizers import SGD

@@ -381,12 +381,9 @@ def show_correlation_matrix(df: pd.DataFrame) -> None:
     """
     corr_data = df.copy()
 
-    # Rename columns for better readability in the correlation matrix
-    for col in corr_data.columns:
-        new_col_name = col.replace("_", " ").title()
-        corr_data[new_col_name] = corr_data[col]
-        corr_data.drop(columns=col, inplace=True)
-
+    # Efficiently rename columns for better readability
+    corr_data.columns = [col.replace("_", " ").title() for col in corr_data.columns]
+    
     title = "Correlation Matrix of Bank Customer Churn"
 
     plt.figure(num=title, figsize=(15, 7))
@@ -483,7 +480,8 @@ def show_classification_report(y_test: pd.Series, y_pred: np.ndarray) -> List[st
     lines.append("Overall Summary:")
 
     # Force the summary labels to occupy exactly 16 characters of space
-    lines.append(f"  {'Total Accuracy':<16} : {report_df.loc['accuracy', 'macro avg']:.4f}")
+    # Accuracy is a scalar column in this DF, not a specific row index.
+    lines.append(f"  {'Total Accuracy':<16} : {report_dict['accuracy']:.4f}")
     lines.append(f"  {'Macro F1-Avg':<16} : {report_df.loc['f1-score', 'macro avg']:.4f}")
     lines.append(f"  {'Weighted F1-Avg':<16} : {report_df.loc['f1-score', 'weighted avg']:.4f}")
 
