@@ -23,12 +23,13 @@ scripts refactored from experimental notebooks.
 - `notebooks/`: Jupyter notebooks used for EDA and experimental modeling.
 - `data/`: Directory for dataset storage (not included in repo).
 
+```
 banking-churn-predictor/
 ├── main.py                     # CLI entry point for data seeding, EDA, and model execution
 ├── requirements.txt            # Python dependencies
 ├── data/                       # Dataset storage
-│   ├── hero.png                # Hero graphic / banner image
-│   └── source_data.csv         # Standard input dataset
+│   ├── hero.png               # Hero graphic / banner image
+│   └── source_data.csv        # Standard input dataset
 ├── models/
 │   └── adam_dropout_model.py
 │   └── adam_model.py
@@ -37,19 +38,20 @@ banking-churn-predictor/
 │   └── sgd_model.py
 │   └── sgd_smote_dropout_model.py
 │   └── sgd_smote_model.py
+│   └── smote_model.py
 ├── notebooks/                    # Full Jupyter Notebook files
 │   └── banking_churn_predictor_notebook.html   # Full Notebook in HTML format
 │   └── banking_churn_predictor_notebook.ipynb  # Full Jupyter Notebook
 │   └── banking_churn_predictor_notebook.py     # Converted Python file
 ├── src/
-│   ├── config.py           # Application configurations and constants
+│   ├── constants.py        # Application configurations and constants
+│   ├── data_handler.py     # Handles the data extraction and manipulation
 │   ├── eda.py              # Exploratory Data Analysis module
-│   ├── modeling.py         # Model training, prediction, and helper functions
-│   ├── pre_processing.py   # Data loading and cleaning pipelines
-│   ├── seeder.py           # Synthetic dataset generator module
+│   ├── model_perf.py       # Gets model performance and show the data results
 │   └── utils.py            # Logging, plotting, and common utilities
+└── tests/                   # Unit Tests
 └── venv/                    # Virtual environment (git-ignored)
-
+```
 
 ## Setup and Installation
 

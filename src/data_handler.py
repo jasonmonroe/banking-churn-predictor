@@ -8,7 +8,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 # Local Libraries
 from src.constants import (
-    CATEGORIAL_COLS,
+    CATEGORICAL_COLS,
     DATA_FILE_PATH,
     IRRELEVANT_COLS,
     SCALING_COLS,
@@ -34,7 +34,7 @@ class DataHandler:
         data = data.drop(columns=IRRELEVANT_COLS, errors='ignore')
 
         # Generate dummy variables: This handles dropping original cols and concentration automatically
-        data = pd.get_dummies(data, columns=CATEGORIAL_COLS, drop_first=True)
+        data = pd.get_dummies(data, columns=CATEGORICAL_COLS, drop_first=True)
 
         return data
 

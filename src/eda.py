@@ -12,7 +12,7 @@ for each column.
 
 # Vendor Libraries
 import matplotlib
-#matplotlib.use('TkAgg')
+from src.utils import show_banner
 matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
@@ -22,19 +22,12 @@ import seaborn as sns
 from sklearn.metrics import (
     accuracy_score,
     classification_report,
-    confusion_matrix,
-    explained_variance_score,
     f1_score,
-    mean_absolute_error,
-    mean_squared_error,
     precision_score,
-    r2_score,
     recall_score,
 )
 from tensorflow.keras.callbacks import History
 from tensorflow.keras.models import Sequential
-
-
 
 # Local Libraries
 from src.constants import (
@@ -43,24 +36,6 @@ from src.constants import (
     CUSTOMER_CHURN_PROB_THRESHOLD,
     TARGET_COL,
 )
-
-
-
-
-# @TODO - defunct
-def observe_data(data: pd.DataFrame):
-    print(data.head())
-    print(data.tail())
-    print(data.shape)
-    print(data.info())
-    print(data.describe().T)
-
-    # Checking the dtypes of the variables in the data
-    print(data.dtypes)
-
-    # Find any missing values
-    data.isnull().sum()
-
 
 def show_visualizations(data: pd.DataFrame) -> None:
     print("# --- 📊 Showing Visualizations 📊 --- #")
@@ -79,20 +54,14 @@ def show_visualizations(data: pd.DataFrame) -> None:
 
     # Display tenure barplot
     labeled_barplot(data, "tenure", perc=True)
-
     labeled_barplot(data, "num_of_products", perc=True)
-
     histogram_boxplot(data, "balance")
-
     labeled_barplot(data, "has_cr_card", perc=True)
-
     histogram_boxplot(data, "estimated_salary")
-
     labeled_barplot(data, "is_active_member", perc=True)
 
     # Display exited barplot
     labeled_barplot(data, TARGET_COL, perc=True)
-
 
 def show_salary_barplot_visualization(df: pd.DataFrame) -> None:
     # Compare estimated salary to bank balance to see if there"s a correlation.
@@ -103,7 +72,6 @@ def show_salary_barplot_visualization(df: pd.DataFrame) -> None:
 
     # Call stacked barplot with the modified DataFrame
     stacked_barplot(barplot_data, "estimated_salary", "balance")
-
 
 def show_plot_distributions(df: pd.DataFrame):
     """
@@ -131,36 +99,8 @@ def show_plot_distributions(df: pd.DataFrame):
     # Compare Number of Products for customers with a stacked barplot.
     stacked_barplot(df, "num_of_products", TARGET_COL)
 
-#@TODO - where is this being used?
-def plot_training_history(history):
-    """
-    Plots the training and validation accuracy and loss.
-    """
-    # Accuracy
-    title = "Model Accuracy"
-    plt.figure(num=title, figsize=(12, 4))
-    plt.subplot(1, 2, 1)
-    plt.plot(history.history["accuracy"], label="Train Accuracy")
-    plt.plot(history.history["val_accuracy"], label="Validation Accuracy")
-    plt.title(title)
-    plt.ylabel("Accuracy")
-    plt.xlabel("Epoch")
-    plt.legend()
-
-    # Loss
-    plt.subplot(1, 2, 2)
-    plt.plot(history.history["loss"], label="Train Loss")
-    plt.plot(history.history["val_loss"], label="Validation Loss")
-    plt.title("Model Loss")
-    plt.ylabel("Loss")
-    plt.xlabel("Epoch")
-    plt.legend()
-    
-    plt.show()
-
 # Define plot to determine model performance
 def plot_model_performance(mod_hist: History, label: str, title: str = "") -> None:
-
     """
     Function to plot loss/accuracy
 
@@ -171,7 +111,7 @@ def plot_model_performance(mod_hist: History, label: str, title: str = "") -> No
     metric_name = label.lower()
     val_metric_name = f"val_{metric_name}"
 
-    fig, _ = plt.subplots() # Creating a subplot with a figure and axes.
+    _, _ = plt.subplots() # Creating a subplot with a figure and axes.
     
     if metric_name in mod_hist.history:
         plt.plot(mod_hist.history[metric_name], label="Train")
@@ -364,7 +304,6 @@ def show_correlation_matrix(df: pd.DataFrame) -> None:
     plt.title(title)
     plt.show()
 
-
 def model_performance_classification(mod: Sequential, predictors: pd.DataFrame, target: pd.Series, threshold:float=CUSTOMER_CHURN_PROB_THRESHOLD) -> pd.DataFrame:
 
     """
@@ -385,5 +324,27 @@ def model_performance_classification(mod: Sequential, predictors: pd.DataFrame, 
 
     return pd.DataFrame({"Accuracy": [accuracy], "Precision": [precision], "Recall": [recall], "F1": [f1]})
 
-def show_classification_report(y_test: pd.Series, y_pred: np.ndarray) -> None:
-    print(classification_report(y_test, y_pred))
+def show_classification_report(y_test: pd.Series, y_pred: np.ndarray) -> list:
+    report_dict = classification_report(y_test, y_pred, output_dict=True)
+    report_df = pd.DataFrame(report_dict)
+
+    lines = []
+    for class_label in ["0", "1"]:
+        label_name = "Loyal Customer (0)" if class_label == "0" else "Churned Customer (1)"
+
+    lines.append(f"Class: {label_name}")
+    lines.append(f" Precision : {report_df.loc['precision', class_label]:.4f}")
+    lines.append(f" Recall    : {report_df.loc['recall', class_label]:.4f}")
+    lines.append(f" F1-Score  : {report_df.loc['f1-score', class_label]:.4f}")
+    lines.append(f" Support   : {int(report_df.loc['support', class_label])}")
+    lines.append("")
+
+    # Parse the global overall summary metrics
+    lines.append("Overall Summary:")
+    lines.append(f" Total Accuracy : {report_df.loc['f1-score', 'accuracy']:.4f}") # Accuracy sits in the f1-score row column 'accuracy'
+    lines.append(f" Macro F1-Avg   : {report_df.loc['f1-score', 'macro avg']:.4f}")
+    lines.append(f" Weighted F1-Avg: {report_df.loc['f1-score', 'weighted avg']:.4f}")
+
+    show_banner("Classification Report", lines)
+
+    return lines

@@ -26,9 +26,8 @@ ARG_PARAMS = [
 FILE_NAME = "source_data.csv"
 SOURCE_PATH = "data/"
 DATA_FILE_PATH = SOURCE_PATH + FILE_NAME
-MAX_DATA_ROWS = 10000
 
-# Data Spitting Parameters (Temp 80%, 20% Test), (Temp): 75% Training, 25% validation
+# Data Splitting Parameters (Temp 80%, 20% Test), (Temp): 75% Training, 25% validation
 HALF_SPLIT = 0.5
 TEMP_SPLIT = 0.80
 TESTING_SPLIT = 0.20
@@ -48,6 +47,8 @@ NEURON_CNT = 64
 NEURON_DEFAULT_CNT = 32
 NEURON_SINGLE_CNT = 1
 LEARNING_RATE = 0.001
+SMOTE_SAMPLING_STRATEGY = 0.40 # Keep minority class capped at 40% of majority size
+SMOTE_K_NEIGHBORS = 3          # Look at tighter neighbor bounds to reduce overlap noise
 
 # Misc Parameters
 BALANCE_THRESHOLD = 20000 # In USD ($)
@@ -62,7 +63,7 @@ SEED = 42
 SGD_OPT_MOMENTUM = 0.9
 
 # Column Parameters
-CATEGORIAL_COLS = ["gender", "geography"]
+CATEGORICAL_COLS = ["gender", "geography"]
 IRRELEVANT_COLS = ["row_number", "customer_id", "surname"]
 METRIC_COLS = ["Accuracy", "Precision", "Recall", "F1"]
 SCALING_COLS = ["x_train", "x_val", "x_test"]

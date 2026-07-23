@@ -47,7 +47,8 @@ from src.eda import (
     show_salary_barplot_visualization,
     show_plot_distributions,
     show_correlation_matrix,
-    show_visualizations, show_classification_report
+    show_visualizations,
+    show_classification_report
 )
 
 
@@ -58,7 +59,7 @@ def run_data_pipeline(args: dict) -> tuple[dict, pd.DataFrame]:
     tf.random.set_seed(SEED)
 
     subtitles = ["We keep your banking customers from leaving!"]
-    show_banner("BANK CHURN PREDICTIONS", subtitles, center_subtitle_text=True)
+    show_banner("QUANTUM BANK CHURN PREDICTIONS", subtitles, center_subtitle_text=True)
 
     data_handler = DataHandler()
 
@@ -91,8 +92,6 @@ def run_model_pipeline(args: dict, dataset: dict) -> list:
     :return:
     """
 
-    print("\n# --- LOADING SMOTE MODEL --- #")
-
     smote_model = SmoteModel(dataset)
     x_smote, y_smote = smote_model.x, smote_model.y
 
@@ -124,7 +123,7 @@ def run_model_pipeline(args: dict, dataset: dict) -> list:
         sgd_smote_model.run(x_smote, y_smote)
 
         # Generate SMOTE Classification Report
-        show_banner(sgd_smote_model.title, "Classification Report")
+        show_banner(sgd_smote_model.title, "Classification Report by Class and Summary", center_subtitle_text=True)
         show_classification_report(sgd_smote_model.y_test, sgd_smote_model.y_predictor)
 
         models.append(sgd_smote_model)
@@ -158,9 +157,6 @@ def run_model_comparison_pipeline(models: list) -> tuple[pd.DataFrame, pd.DataFr
         formatted_val_perfs = format_performance(model_comparison_val_perfs_matrix)
 
         # --- Display Comparisons --- #
-        #show_banner("Comparison Model Training Performances".upper(), [model_comparison_train_perfs_matrix.to_string(float_format="%.4f")])
-        #show_banner("Comparison Model Validation Performances".upper(), [model_comparison_val_perfs_matrix.to_string(float_format="%.4f")])
-
         show_banner("Comparison Model Training Performances", formatted_train_perfs)
         show_banner("Comparison Model Validation Performances", formatted_val_perfs)
 
