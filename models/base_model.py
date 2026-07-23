@@ -17,6 +17,7 @@ from typing import Dict, Optional, Union
 import numpy as np
 import pandas as pd
 import tensorflow as tf
+from pandas import DataFrame
 from tensorflow.keras import Sequential
 from tensorflow.keras.callbacks import EarlyStopping, History, ModelCheckpoint, ReduceLROnPlateau
 from tensorflow.keras.layers import Dense
@@ -355,7 +356,7 @@ class BaseModel(ABC):
 
     def _run_model_perf(
         self, title: str, x_data: pd.DataFrame, y_data: pd.Series
-    ) -> pd.DataFrame:
+    ) -> DataFrame | None:
         """
         Calculates and displays model performance using the `ModelPerformance`
         instance.
