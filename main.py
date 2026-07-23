@@ -168,19 +168,23 @@ def run_model_comparison_pipeline(models: list) -> tuple[pd.DataFrame, pd.DataFr
 
 
 def run_customer_churn_results(final_model, raw_csv_data: pd.DataFrame) -> None:
-
-    customer_count = raw_csv_data.shape[0]
-    subtitles = [
-        "Will the customer leave the bank within the next six months❓",
-        f"This bank has {customer_count} customers.  Customer Churn Rate is {CUSTOMER_CHURN_PROB_THRESHOLD * 100}%",
-    ]
+    total_rows = raw_csv_data.shape[0]
 
     # Get all predictions
     predictions = final_model.model.predict(final_model.x_test_norm, verbose=0)
+    customer_count = len(predictions)
 
+    subtitles = [
+        "Will the customer leave the bank within the next six months❓",
+        f"There are {total_rows} rows of data to process.",
+        f"This bank has {customer_count} customers.  Customer Churn Rate is {CUSTOMER_CHURN_PROB_THRESHOLD * 100}%",
+    ]
+
+    customer_churn_ctr = 0
     full_line = "-" * (PEP8_LINE_LEN - 4)
     header = "Row | Customer ID | Probability | Status"
     results = [full_line, header, full_line]
+
     for idx, probability in enumerate(predictions):
         prob = probability[0]
         is_churning = prob > CUSTOMER_CHURN_PROB_THRESHOLD
@@ -191,12 +195,19 @@ def run_customer_churn_results(final_model, raw_csv_data: pd.DataFrame) -> None:
         probability_pct_text = f"{probability_pct:.1f}%"
         status = "❌" if is_churning else "✅"
 
+        if is_churning:
+            customer_churn_ctr += 1
+
         line = f"{row_number:<3} | {customer_id:<11} | {probability_pct_text:<11} | {status}"
         results.append(line)
 
-        # Test only 10
-        if row_number > 4:
-            break
+    # Output Final results
+    customer_churn_pct = (customer_churn_ctr / customer_count) * 100
+
+    results.append(full_line)
+    results.append("Report:")
+    results.append(f"{customer_churn_ctr} customers are at risk of churning.")
+    results.append(f"That's {customer_churn_pct:.2f}% of our customers!")
 
     subtitles.extend(results)
     show_banner("Quantum Bank Churn Predictor Results".upper(), subtitles)
