@@ -7,7 +7,7 @@ from tensorflow.keras.optimizers import SGD
 
 # Local Libraries
 from models.base_model import BaseModel
-from src.constants import NEURON_DEFAULT_CNT, NEURON_SINGLE_CNT, LEARNING_RATE, SGD_OPT_MOMENTUM
+from src.constants import NEURON_DEFAULT_CNT, NEURON_SINGLE_CNT, SGD_LEARNING_RATE, SGD_OPT_MOMENTUM
 
 
 class SGDModel(BaseModel):
@@ -24,8 +24,8 @@ class SGDModel(BaseModel):
         super().__init__(dataset)
 
         self.title = "Neural Network (SGD)"
-        #self._optimizer = "SGD"
-        self._optimizer = SGD(learning_rate=LEARNING_RATE, momentum=SGD_OPT_MOMENTUM)
+
+        self._optimizer = SGD(learning_rate=SGD_LEARNING_RATE, momentum=SGD_OPT_MOMENTUM)
         self.model = self._create()
 
     def _create(self) -> Sequential:

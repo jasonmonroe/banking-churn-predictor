@@ -8,7 +8,7 @@ from tensorflow.keras.optimizers import Adam
 # Local Libraries
 from models.base_model import BaseModel
 from src.constants import (
-    LEARNING_RATE,
+    ADAM_LEARNING_RATE,
     NEURON_DEFAULT_CNT,
     NEURON_SINGLE_CNT,
 )
@@ -26,7 +26,7 @@ class AdamModel(BaseModel):
         super().__init__(dataset)
 
         self.title = "Neural Network (Adam Optimizer)"
-        self._optimizer = Adam(learning_rate=LEARNING_RATE)
+        self._optimizer = Adam(learning_rate=ADAM_LEARNING_RATE)
         self.model = self._create()
 
     def _create(self) -> Sequential:

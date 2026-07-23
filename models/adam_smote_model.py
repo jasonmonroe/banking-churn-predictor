@@ -2,11 +2,12 @@
 
 # Vendor Libraries
 from keras import Sequential
+from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.layers import Dense
 
 # Local Libraries
 from models.base_model import BaseModel
-from src.constants import NEURON_DEFAULT_CNT, NEURON_SINGLE_CNT
+from src.constants import NEURON_DEFAULT_CNT, NEURON_SINGLE_CNT, ADAM_SMOTE_LEARNING_RATE
 
 
 class AdamSmoteModel(BaseModel):
@@ -14,7 +15,7 @@ class AdamSmoteModel(BaseModel):
         super().__init__(dataset)
 
         self.title = "Neural Network (Adam with SMOTE)"
-        self._optimizer = "adam"
+        self._optimizer = Adam(learning_rate=ADAM_SMOTE_LEARNING_RATE)
         self.model = self._create()
 
     def _create(self) -> Sequential:

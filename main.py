@@ -254,43 +254,6 @@ def run_main_pipeline(args: dict) -> None:
 
     return None
 
-    """
-    OLD VERSION: IGNORE ANY LINES BELOW
-    
-    
-
-    best_model_name = ModelPerformance.get_best_model_name(train_matrix, val_matrix)
-    show_banner("Best Performing Model", [f"{best_model_name}"], center_subtitle_text=True)
-
-    # --- Final Test Evaluation --- #
-     
-    #This is the Real World check using test data in it's evaluation.  Each model inherits the base class that has the 
-    #entire dataset.  Test data is unused at this point and will be the same for each model.
-   
-    test_model_perfs = ModelPerformance.get_test_model_perfs(models)
-    final_model = ModelPerformance.get_final_model(test_model_perfs, models)
-
-    subtitles = [
-        f"Final Model: {final_model.title}",
-        "Performance",
-    ]
-
-    for metric_name, series_data in final_model.model_perf.data.items():
-        metric_value = series_data.iloc[0]
-        metric_value_pct = metric_value * 100
-        metric_value_text = f"{metric_value_pct:.4f}%"
-        perf_line = f"{metric_name:<10}: {metric_value_text}"
-        subtitles.append(perf_line)
-
-    show_banner("Final Evaluation", subtitles)
-
-    # Evaluate customer churn probabilities using the final prediction pipeline.
-    run_customer_churn_results(final_model, raw_csv_data)
-    return None
-    
-    """
-
-
 
 def _parse_args(command_line_args: list[str]) -> dict:
     """

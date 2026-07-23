@@ -8,11 +8,11 @@ from tensorflow.keras.optimizers import SGD
 # Local Libraries
 from models.base_model import BaseModel
 from src.constants import (
-    LEARNING_RATE,
     NEURON_DEFAULT_CNT,
     NEURON_SINGLE_CNT,
     CUSTOMER_CHURN_PROB_THRESHOLD,
     SGD_OPT_MOMENTUM,
+    SGD_SMOTE_LEARNING_RATE,
 )
 
 
@@ -21,7 +21,7 @@ class SGDSmoteModel(BaseModel):
         super().__init__(dataset)
 
         self.title = "Neural Network (SGD with SMOTE)"
-        self._optimizer = SGD(learning_rate=LEARNING_RATE, momentum=SGD_OPT_MOMENTUM)
+        self._optimizer = SGD(learning_rate=SGD_SMOTE_LEARNING_RATE, momentum=SGD_OPT_MOMENTUM)
         self.model = self._create()
         self.y_predictor = self._get_predictor()
 

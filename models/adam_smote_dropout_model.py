@@ -7,7 +7,7 @@ from tensorflow.keras.optimizers import Adam
 
 # Local Libraries
 from models.base_model import BaseModel
-from src.constants import LEARNING_RATE, DROPOUT_SMOTE_RATE, NEURON_DEFAULT_CNT, NEURON_SINGLE_CNT
+from src.constants import ADAM_SMOTE_DROPOUT_LEARNING_RATE, DROPOUT_SMOTE_RATE, NEURON_DEFAULT_CNT, NEURON_SINGLE_CNT
 
 
 class AdamSmoteDropoutModel(BaseModel):
@@ -15,7 +15,7 @@ class AdamSmoteDropoutModel(BaseModel):
         super().__init__(dataset)
 
         self.title = "Neural Network (Adam with Dropout and SMOTE)"
-        self._optimizer = Adam(learning_rate=LEARNING_RATE)
+        self._optimizer = Adam(learning_rate=ADAM_SMOTE_DROPOUT_LEARNING_RATE)
         self.model = self._create()
 
     def _create(self) -> Sequential:

@@ -7,7 +7,7 @@ from tensorflow.keras.optimizers import Adam
 
 # Local Libraries
 from models.base_model import BaseModel
-from src.constants import LEARNING_RATE, DROPOUT_RATE, NEURON_DEFAULT_CNT, NEURON_SINGLE_CNT
+from src.constants import DROPOUT_RATE, NEURON_DEFAULT_CNT, NEURON_SINGLE_CNT, ADAM_DROPOUT_LEARNING_RATE
 
 
 class AdamDropoutModel(BaseModel):
@@ -15,7 +15,7 @@ class AdamDropoutModel(BaseModel):
         super().__init__(dataset)
 
         self.title = "Neural Network (Adam and Dropout)"
-        self._optimizer = Adam(learning_rate=LEARNING_RATE)
+        self._optimizer = Adam(learning_rate=ADAM_DROPOUT_LEARNING_RATE, weight_decay=1e-4)
         self.model = self._create()
 
     def _create(self) -> Sequential:

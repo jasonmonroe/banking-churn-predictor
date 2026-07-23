@@ -20,7 +20,7 @@ class SmoteModel:
         self.y = None
 
         self.model = self._create()
-        self.x, self.y = self._fit(dataset)
+        self.x, self.y = self.model.fit_resample(dataset["x_train_norm"], dataset["y_train"])
 
         # Check the shapes
         print("\n# --- Loading SMOTE Model --- #")
@@ -33,12 +33,3 @@ class SmoteModel:
             k_neighbors=SMOTE_K_NEIGHBORS,
             random_state=SEED
         )
-
-    def _fit(self, dataset: dict) -> tuple:
-        """
-        Fit the SMOTE Model
-        :param dataset:
-        :return: tuple
-        """
-
-        return self.model.fit_resample(dataset["x_train_norm"], dataset["y_train"])
