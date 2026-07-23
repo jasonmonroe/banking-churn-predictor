@@ -171,72 +171,30 @@ def show_banner(title: str, subtitle: str | list | None="", center_title_text: b
 def format_performance(df: pd.DataFrame) -> list:
     """
     Formats model performances vertically for clean rendering inside text banners.
-    Works perfectly for both single-model dataframes and multi-model comparison matrices.
+    Dynamically renders all available metrics (Accuracy, Precision, Recall, F1, AUC, etc.)
     """
     lines = []
 
     # 1. Transpose so models become the loop rows and metrics become columns
     flipped_matrix = df.T
+    separator = "-" * (PEP8_LINE_LEN - 4)
 
     # 2. Iterate through each model row
     for model_title, row_data in flipped_matrix.iterrows():
-
-        # If it's a single model, the 'model_title' is actually just the metric name (e.g. 'Accuracy')
-        # We handle single-model format by checking if the row index is an expected metric
         if str(model_title) in METRIC_COLS:
-            # Single model layout: the row_data contains the single score in column 0
-            # We grab the first available value natively using .iloc[0]
-            lines.append(f" {model_title:<9} : {row_data.iloc[0]:.4f}")
+            # Single model layout (Metrics as Index)
+            lines.append(f" {str(model_title).title():<10}: {row_data.iloc[0]:.4f}")
 
         else:
-            # Multi-model layout: 'model_title' is the actual name of the model class
+            # Multi-model comparison layout
             lines.append(f"Model: {model_title}")
-            lines.append(f" Accuracy  : {row_data['Accuracy']:.4f}")
-            lines.append(f" Precision : {row_data['Precision']:.4f}")
-            lines.append(f" Recall    : {row_data['Recall']:.4f}")
-            lines.append(f" F1-Score  : {row_data['F1']:.4f}")
-            lines.append("-" * (PEP8_LINE_LEN - 4)) # Empty line break between models
+            
+            # Iterate through all available metrics in the row dynamically
+            for metric, value in row_data.items():
+                # Clean up naming: e.g. 'f1_score' -> 'F1 Score'
+                display_name = str(metric).replace('_', ' ').title()
+                lines.append(f" {display_name:<10}: {value:.4f}")
+            
+            lines.append(separator) 
 
     return lines
-
-
-def format_performance_1(df: pd.DataFrame) -> list:
-    """
-    Formats the performance metrics vertically for clean rendering.
-    :param df:
-    :return:
-    """
-
-    # Flip the matrix so metrics ('Accuracy', 'F1', etc.) become the rows
-    flipped_matrix = df.T
-
-    lines = []
-    for metric_name, row_data in flipped_matrix.iterrows():
-        # row_data[0] extracts the actual floating-point number from column index 0
-        raw_value = row_data[0]
-
-        # Format the line dynamically using the metric name
-        lines.append(f"{metric_name:<9} : {raw_value:.4f}")
-
-    return lines
-    #return "\n".join(lines)
-
-# @TODO - old version
-def format_performance_2(df: pd.DataFrame) -> str:
-    """
-    Transpose so models become the loop rows.
-    :param df:
-    :return:
-    """
-    lines = []
-    flipped_matrix = df.T
-
-    for model_title, row_data in flipped_matrix.iterrows():
-        lines.append(f"Model: {model_title}")
-        lines.append(f" Accuracy  : {row_data['Accuracy']:.4f}")
-        lines.append(f" Precision : {row_data['Precision']:.4f}")
-        lines.append(f" Recall    : {row_data['Recall']:.4f}")
-        lines.append(f" F1-Score  : {row_data['F1']:.4f}")
-        lines.append("") # Empty space between models
-
-    return "\n".join(lines)

@@ -64,5 +64,5 @@ SGD_OPT_MOMENTUM = 0.9
 # Column Parameters
 CATEGORICAL_COLS = ["gender", "geography"]
 IRRELEVANT_COLS = ["row_number", "customer_id", "surname"]
-METRIC_COLS = ["Accuracy", "Precision", "Recall", "F1"]
+METRIC_COLS = ["Accuracy", "Precision", "Recall", "F1", "AUC"]
 TARGET_COL = "exited"

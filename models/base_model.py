@@ -11,6 +11,7 @@ from src.model_perf import ModelPerformance
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, History
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.callbacks import ReduceLROnPlateau
+from tensorflow.keras.metrics import F1Score
 from tensorflow.keras import Sequential
 
 # Local Libraries
@@ -85,10 +86,13 @@ class BaseModel(ABC):
         return model
 
     def _compile(self) -> None:
+        # Adding F1Score as it's the gold standard for imbalanced churn data
+        f1_metric = F1Score(name="f1_score", dtype=None, threshold=0.5)
+        
         self.model.compile(
             optimizer=self._optimizer,
-            loss="binary_crossentropy", # should i use this or 'sparse_categorical_crossentropy'
-            metrics=["accuracy", "precision", "recall", "auc"],
+            loss="binary_crossentropy", 
+            metrics=["accuracy", "precision", "recall", "auc", f1_metric],
         )
 
     def _show_summary(self) -> None:
@@ -172,7 +176,7 @@ class BaseModel(ABC):
 
         return model_history
 
-    def evaluate(self) -> tuple:
+    def evaluate(self) -> dict:
         """
         Evaluates model.
 
@@ -184,7 +188,7 @@ class BaseModel(ABC):
         :return:
         """
 
-        test_loss, test_accuracy, test_precision, test_recall, test_auc = self.model.evaluate(
+        results = self.model.evaluate(
             x=self.x_test_norm,
             y=self.y_test,
             batch_size=BATCH_CNT,
@@ -193,17 +197,10 @@ class BaseModel(ABC):
         )
 
         # Output Evaluation Results
-        subtitles = [
-            f"{'Test Loss':<15}: {test_loss:.4f}",
-            f"{'Test Accuracy':<15}: {test_accuracy:.4f}",
-            f"{'Test Precision':<15}: {test_precision:.4f}",
-            f"{'Test Recall':<15}: {test_recall:.4f}",
-            f"{'Test AUC':<15}: {test_auc:.4f}"
-        ]
-
+        subtitles = [f"{key.replace('_', ' ').title():<15}: {float(np.mean(value)):.4f}" for key, value in results.items()]
         show_banner(f"{self.title} Evaluation Test Results", subtitles)
 
-        return test_loss, test_accuracy, test_precision, test_recall, test_auc
+        return results
 
     def _run_model_perf(self, title: str, x_data: pd.DataFrame, y_data: pd.Series) -> pd.DataFrame:
         self.model_perf.get(title, self.model, x_data, y_data)
@@ -228,20 +225,20 @@ class BaseModel(ABC):
         :return:
         """
 
+        # Smote Data is being used
         if x_data is not None and y_data is not None:
-            # Smote Data is being used
+            print(f"\nℹ️ SMOTE data is being used for {self.title}.")
             return x_data, y_data, self.title + " SMOTE "
         else:
             return self.x_train_norm, self.y_train, self.title
 
-    def run(self, x_smote_data=pd.DataFrame | np.ndarray | None, y_smote_data=pd.Series | np.ndarray | None) -> None:
+    def run(self, x_smote_data: pd.DataFrame | np.ndarray | None = None, y_smote_data: pd.Series | np.ndarray | None = None) -> None:
         """
-        Run the model to get the training validation performances.
-        Then plot the models performance  based on accuracy and loss.
+        Run the model to get the training validation performances. Then plot the models performance  based on accuracy
+        and loss.
 
         ❗Important: If smote data is used as arguments override the other data. Only use x_smote, y_smote
         for training, validation will still use x_val_norm, y_val
-
 
         :param x_smote_data:
         :param y_smote_data:

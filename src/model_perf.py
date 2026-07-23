@@ -2,7 +2,7 @@
 
 # Vendor Libraries
 import pandas as pd
-from src.constants import OVERFITTING_THRESHOLD, METRIC_COLS
+from src.constants import OVERFITTING_THRESHOLD
 from tensorflow.keras import Sequential
 
 # Local Libraries
@@ -46,6 +46,7 @@ class ModelPerformance:
     def create_comparisons(models: list) -> tuple[pd.DataFrame, pd.DataFrame]:
         """
         Creates multiple lists of comparisons (training, validation, titles, and then converts to matrices.
+
         :param models:
         :return:
         """
@@ -86,7 +87,12 @@ class ModelPerformance:
         """
         Identifies the best model based strictly on validation performance,
         with optional overfitting checks against training performance[cite: 4].
+
+        :param validation_perf_matrix:
+        :param train_perf_matrix:
+        :return:
         """
+
         if validation_perf_matrix.empty:
             raise ValueError("🚩Error: Validation performance matrix is empty.")
 
@@ -116,4 +122,3 @@ class ModelPerformance:
                 return model
 
         raise ValueError(f"🚩Error: Could not find model matching name: {best_model_name}")
-    
