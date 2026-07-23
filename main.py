@@ -78,30 +78,6 @@ def run_data_pipeline(args: dict) -> tuple[dict, pd.DataFrame]:
     return dataset_df, raw_df
 
 
-    """
-    OLD VERSION
-    # load raw data
-    data = data_handler.data
-    df = data.copy()
-
-    if args.get("eda"):
-        data_handler.describe()
-        show_visualizations(df)
-        show_salary_barplot_visualization(df)
-        show_plot_distributions(df)
-
-    # Clean the data
-    df = data_handler.filter(df)
-
-    if args.get("eda"):
-        show_correlation_matrix(df)
-
-    dataset = data_handler.get(df)
-
-    return dataset, data.copy()
-    """
-
-
 def run_model_pipeline(args: dict, dataset: dict) -> list:
     """
     Return all models requested in the command line.
@@ -155,9 +131,6 @@ def run_model_pipeline(args: dict, dataset: dict) -> list:
     # 6) Build Neural Network Adam and Dropout with SMOTE
     if args.get("all") or args.get("model:adam-smote-dropout"):
         adam_smote_dropout_model = AdamSmoteDropoutModel(dataset)
-        adam_smote_dropout_model.run()
-
-        print(f"Run {adam_smote_dropout_model.title} again but with SMOTE data...")
         adam_smote_dropout_model.run(x_smote, y_smote)
 
         models.append(adam_smote_dropout_model)
@@ -192,7 +165,7 @@ def run_model_comparison_pipeline(models: list) -> tuple[pd.DataFrame, pd.DataFr
         return pd.DataFrame(), pd.DataFrame()
 
 
-def run_customer_churn_results(final_model, raw_csv_data: pd.DataFrame) -> None:
+def run_customer_churn_results(final_model, raw_csv_data: pd.DataFrame) -> list:
     total_rows = raw_csv_data.shape[0]
 
     # Get all predictions
@@ -235,7 +208,8 @@ def run_customer_churn_results(final_model, raw_csv_data: pd.DataFrame) -> None:
     results.append(f"That's {customer_churn_pct:.2f}% of our customers!")
 
     subtitles.extend(results)
-    show_banner("Quantum Bank Churn Predictor Results".upper(), subtitles)
+
+    return subtitles
 
 
 def run_main_pipeline(args: dict) -> None:
@@ -260,16 +234,39 @@ def run_main_pipeline(args: dict) -> None:
 
         return None
 
+    # --- Multiple Models --- #
+
+    # 1. Compare validation matrices to find the champion
     train_matrix, val_matrix = run_model_comparison_pipeline(models)
+    best_model_name = ModelPerformance.get_best_model_name(val_matrix, train_matrix)
+    show_banner("Best Performing Model (Validation)", [f"{best_model_name}"], center_subtitle_text=True)
+
+    # 2. Grab the winning model object
+    final_model = ModelPerformance.get_final_model(best_model_name, models)
+
+    # 3. Run the official .evaluate() test on the unseen test set *only* for this winner
+    final_model.evaluate()
+
+    # 4. Predict customer churn using the final model
+    customer_churn_results = run_customer_churn_results(final_model, raw_csv_data)
+
+    show_banner("Quantum Bank Churn Predictor Results".upper(), customer_churn_results)
+
+    return None
+
+    """
+    OLD VERSION: IGNORE ANY LINES BELOW
+    
+    
 
     best_model_name = ModelPerformance.get_best_model_name(train_matrix, val_matrix)
     show_banner("Best Performing Model", [f"{best_model_name}"], center_subtitle_text=True)
 
     # --- Final Test Evaluation --- #
-    """
-    This is the Real World check using test data in it's evaluation.  Each model inherits the base class that has the 
-    entire dataset.  Test data is unused at this point and will be the same for each model.
-    """
+     
+    #This is the Real World check using test data in it's evaluation.  Each model inherits the base class that has the 
+    #entire dataset.  Test data is unused at this point and will be the same for each model.
+   
     test_model_perfs = ModelPerformance.get_test_model_perfs(models)
     final_model = ModelPerformance.get_final_model(test_model_perfs, models)
 
@@ -290,6 +287,9 @@ def run_main_pipeline(args: dict) -> None:
     # Evaluate customer churn probabilities using the final prediction pipeline.
     run_customer_churn_results(final_model, raw_csv_data)
     return None
+    
+    """
+
 
 
 def _parse_args(command_line_args: list[str]) -> dict:

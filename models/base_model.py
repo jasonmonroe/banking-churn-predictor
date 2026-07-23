@@ -129,21 +129,18 @@ class BaseModel(ABC):
 
     def _build(self, input_data: pd.DataFrame | np.ndarray | None, target_data: pd.Series | np.ndarray | None) -> History:
         """
+        Build Model Logic
+        To get model history use model.fit(x=x_data, y=y_data) with validation data (x_val_norm, y_val)
+        #Training: x_data=x_train_norm, y_data=y_train, validation_data=(x_val_norm, y_val)
+        #Validation: x_data=x_val_norm, y_data=y_val, validation_data=(x_val_norm, y_val)
+        Testing: x_data=x_test_norm, y_data=y_test, NO FITTING, just evaluate(), no plotting model performance
+
         https://geeksforgeeks.org/deep-learning/model-fit-in-tensorflow/
 
         :param x_data:
         :param y_data:
         :return:
         """
-
-        """
-        Build Model Logic
-        To get model history use model.fit(x=x_data, y=y_data) with validation data (x_val_norm, y_val)
-        #Training: x_data=x_train_norm, y_data=y_train, validation_data=(x_val_norm, y_val)
-        #Validation: x_data=x_val_norm, y_data=y_val, validation_data=(x_val_norm, y_val)
-        Testing: x_data=x_test_norm, y_data=y_test, NO FITTING, just evaluate(), no plotting model performance
-        """
-
         start_time = start_timer()
 
         # Get the data for fitting the model
@@ -167,6 +164,8 @@ class BaseModel(ABC):
         self.run_time = get_time(start_time)
         show_timer(start_time)
 
+        #self.evaluate()
+
         # Display Training and Validation results
         self.train_perf = self._run_model_perf(perf_title + "Training", self.x_train_norm, self.y_train)
         self.val_perf = self._run_model_perf(perf_title + "Validation", self.x_val_norm, self.y_val)
@@ -180,26 +179,13 @@ class BaseModel(ABC):
         https://www.tensorflow.org/guide/keras/training_with_built_in_methods
         https://https://www.geeksforgeeks.org/deep-learning/model-evaluate-in-tensorflow/
 
-
-        model.evaluate(
-        x=None,
-        y=None,
-        batch_size=None,
-        verbose=1,
-        sample_weight=None,
-        steps=None,
-        callbacks=None,
-        return_dict=False,
-        use_multiprocessing=False
-        )
-
         :param x_data:
         :param y_data:
         :return:
         """
 
         test_loss, test_accuracy, test_precision, test_recall, test_auc = self.model.evaluate(
-            x=self.x_train_norm,
+            x=self.x_test_norm,
             y=self.y_test,
             batch_size=BATCH_CNT,
             verbose=2,
