@@ -288,7 +288,8 @@ def stacked_barplot(data: pd.DataFrame, predictor: str, target: str) -> None:
         by=sorter, ascending=False
     )
 
-    print(f"line 261-DBG: {tab1}")
+    print("-" * PEP8_LINE_LEN)
+    print(tab1)
     print("-" * PEP8_LINE_LEN)
 
     tab = pd.crosstab(data[predictor], data[target], normalize="index").sort_values(
@@ -384,7 +385,5 @@ def model_performance_classification(mod: Sequential, predictors: pd.DataFrame, 
 
     return pd.DataFrame({"Accuracy": [accuracy], "Precision": [precision], "Recall": [recall], "F1": [f1]})
 
-def show_classification_report(y_test, y_pred: np.ndarray) -> None:
-    print(f"y_test: {type(y_test)}, y_pred: {type(y_pred)}")
-    # y_test: <class 'pandas.Series'>, y_pred: <class 'numpy.ndarray'>
+def show_classification_report(y_test: pd.Series, y_pred: np.ndarray) -> None:
     print(classification_report(y_test, y_pred))

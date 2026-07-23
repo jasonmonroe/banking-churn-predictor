@@ -20,7 +20,6 @@ ARG_PARAMS = [
     "--model:sgd-smote",
     "--model:adam-smote",
     "--model:adam-smote-dropout",
-
 ]
 
 # Data Files
@@ -44,7 +43,7 @@ SECS_IN_MIN = 60
 BATCH_CNT = 32
 DROPOUT_RATE = 0.25
 DROPOUT_SMOTE_RATE = 0.3
-EPOCH_CNT = 2 #100
+EPOCH_CNT = 1 #100
 NEURON_CNT = 64
 NEURON_DEFAULT_CNT = 32
 NEURON_SINGLE_CNT = 1
@@ -52,9 +51,9 @@ LEARNING_RATE = 0.001
 
 # Misc Parameters
 BALANCE_THRESHOLD = 20000 # In USD ($)
+CUSTOMER_CHURN_PROB_THRESHOLD = 0.35
 OVERFITTING_THRESHOLD = 0.15
 PEP8_LINE_LEN = 79
-CUSTOMER_CHURN_PROB_THRESHOLD = 0.35
 SEED = 42
 
 # Adds speed (inertia) from past steps. A value of 0.9 means the optimizer keeps 90% of its previous direction and adds 
@@ -62,7 +61,9 @@ SEED = 42
 # curve.
 SGD_OPT_MOMENTUM = 0.9
 
+# Column Parameters
 CATEGORIAL_COLS = ["gender", "geography"]
 IRRELEVANT_COLS = ["row_number", "customer_id", "surname"]
+METRIC_COLS = ["Accuracy", "Precision", "Recall", "F1"]
 SCALING_COLS = ["x_train", "x_val", "x_test"]
 TARGET_COL = "exited"

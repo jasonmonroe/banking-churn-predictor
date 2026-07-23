@@ -9,14 +9,12 @@ Global helper functions for project.
 
 # Python Libraries
 import time
-import random
-import numpy as np
-import tensorflow as tf
+import pandas as pd
 import textwrap
 import uuid
 
 # Local Libraries
-from src.constants import SECS_IN_MIN, PEP8_LINE_LEN
+from src.constants import SECS_IN_MIN, PEP8_LINE_LEN, METRIC_COLS
 
 
 def get_run_id() -> str:
@@ -32,6 +30,11 @@ def start_timer() -> float:
 
 
 def get_time(start_time_float: float) -> str:
+    """
+    Get time in string format.
+    :param start_time_float:
+    :return:
+    """
     diff = abs(time.time() - start_time_float)
     _, remainder = divmod(diff, SECS_IN_MIN*SECS_IN_MIN)
     minutes, seconds = divmod(remainder, SECS_IN_MIN)
@@ -125,6 +128,7 @@ def _create_subtitle_banner(text: str | list, center_text: bool=False) -> None:
 
     return None
 
+
 def _get_wrapped_lines(text: str | list, max_line_len: int) -> list:
     """
     Gets all wrapped lines and formats them accordingly.
@@ -148,37 +152,91 @@ def _get_wrapped_lines(text: str | list, max_line_len: int) -> list:
 
     return wrapped_lines
 
+
 def show_banner(title: str, subtitle: str | list | None="", center_title_text: bool=True, center_subtitle_text: bool=False) -> None:
+    """
+    Shows Banner in formatted style.
+    :param title:
+    :param subtitle:
+    :param center_title_text:
+    :param center_subtitle_text:
+    :return:
+    """
     _create_title_banner(title, center_title_text)
 
     if subtitle:
         _create_subtitle_banner(subtitle, center_subtitle_text)
 
-# @TODO- defunct
-def show_banner2(title: str, section: str='') -> None:
-    padding = 2
-    strlen = len(title) + padding
 
-    # Top line
-    print("\n")
-    print('+ ', end='')
-    print('-' * strlen)
-    print('+', end='')
+def format_performance(df: pd.DataFrame) -> list:
+    """
+    Formats model performances vertically for clean rendering inside text banners.
+    Works perfectly for both single-model dataframes and multi-model comparison matrices.
+    """
+    lines = []
 
-    # Show title
-    print('  ' + title)
+    # 1. Transpose so models become the loop rows and metrics become columns
+    flipped_matrix = df.T
 
-    print('+ ', end='')
-    print('-' * strlen)
-    print('+', end='')
+    # 2. Iterate through each model row
+    for model_title, row_data in flipped_matrix.iterrows():
 
-    # Show section
-    if section:
-        print(' ' + section)
-        print("\n")
+        # If it's a single model, the 'model_title' is actually just the metric name (e.g. 'Accuracy')
+        # We handle single-model format by checking if the row index is an expected metric
+        if str(model_title) in METRIC_COLS:
+            # Single model layout: the row_data contains the single score in column 0
+            # We grab the first available value natively using .iloc[0]
+            lines.append(f" {model_title:<9} : {row_data.iloc[0]:.4f}")
 
-# @TODO - defunct
-def seed_script(seed_val: int):
-    np.random.seed(seed_val)
-    random.seed(seed_val)
-    tf.random.set_seed(seed_val)
+        else:
+            # Multi-model layout: 'model_title' is the actual name of the model class
+            lines.append(f"Model: {model_title}")
+            lines.append(f" Accuracy  : {row_data['Accuracy']:.4f}")
+            lines.append(f" Precision : {row_data['Precision']:.4f}")
+            lines.append(f" Recall    : {row_data['Recall']:.4f}")
+            lines.append(f" F1-Score  : {row_data['F1']:.4f}")
+            lines.append("-") # Empty line break between models
+
+    return lines
+
+
+def format_performance_1(df: pd.DataFrame) -> list:
+    """
+    Formats the performance metrics vertically for clean rendering.
+    :param df:
+    :return:
+    """
+
+    # Flip the matrix so metrics ('Accuracy', 'F1', etc.) become the rows
+    flipped_matrix = df.T
+
+    lines = []
+    for metric_name, row_data in flipped_matrix.iterrows():
+        # row_data[0] extracts the actual floating-point number from column index 0
+        raw_value = row_data[0]
+
+        # Format the line dynamically using the metric name
+        lines.append(f"{metric_name:<9} : {raw_value:.4f}")
+
+    return lines
+    #return "\n".join(lines)
+
+# @TODO - old version
+def format_performance_2(df: pd.DataFrame) -> str:
+    """
+    Transpose so models become the loop rows.
+    :param df:
+    :return:
+    """
+    lines = []
+    flipped_matrix = df.T
+
+    for model_title, row_data in flipped_matrix.iterrows():
+        lines.append(f"Model: {model_title}")
+        lines.append(f" Accuracy  : {row_data['Accuracy']:.4f}")
+        lines.append(f" Precision : {row_data['Precision']:.4f}")
+        lines.append(f" Recall    : {row_data['Recall']:.4f}")
+        lines.append(f" F1-Score  : {row_data['F1']:.4f}")
+        lines.append("") # Empty space between models
+
+    return "\n".join(lines)

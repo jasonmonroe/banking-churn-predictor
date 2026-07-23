@@ -31,8 +31,8 @@ class BaseModel(ABC):
         self.model_perf = ModelPerformance()
         self.train_perf = None
         self.val_perf = None
-        self.x_data_perf = None # public
-        self.y_data_perf = None # public
+        self.x_data_perf = None
+        self.y_data_perf = None
 
         # Split data attributes
         self.x_train = pd.DataFrame()
@@ -40,7 +40,7 @@ class BaseModel(ABC):
         self.x_val = pd.DataFrame()
         self.y_val = pd.Series()
         self.x_test = pd.DataFrame()
-        self.y_test = pd.Series() # public
+        self.y_test = pd.Series()
 
         # Normalized attributes
         self.x_train_norm = pd.DataFrame()
@@ -51,7 +51,6 @@ class BaseModel(ABC):
 
         # Get feature count for model creation
         self._feature_cnt = self._count_features()
-        print(f"\n(Tuple) Feature Count: {self._feature_cnt}")
 
     def _set_attrs(self, dataset) -> None:
         for key, value in dataset.items():
@@ -134,23 +133,7 @@ class BaseModel(ABC):
 
         # Display Training and Validation results
         self.train_perf = self._run_model_perf(perf_title + "Training", self.x_train_norm, self.y_train)
-        #self.model_perf.get(perf_title + "Training", self.model, self.x_train_norm, self.y_train)
-        #self.model_perf.show()
-        #self.train_perf = self.model_perf.data
-
-        #self.model_perf = self._get_model_perf_2(perf_title + "Training", self.x_train_norm, self.y_train)
-
-        #self.model_perf.get(perf_title + "Validation", self.model, self.x_val_norm, self.y_val)
-        #self.model_perf.show()
         self.val_perf = self._run_model_perf(perf_title + "Validation", self.x_val_norm, self.y_val)
-
-
-
-        #self.show_model_perf(perf_title + "Training", self.x_train_norm, self.y_train)
-        #self.show_model_perf(perf_title + "Validation", self.x_val_norm, self.y_val)
-
-        #self.show_model_perf(perf_title + "Training", x_data, y_data)
-        #self.show_model_perf(perf_title + "Validation", self.x_val_norm, self.y_val)
 
         return model_history
 
@@ -163,10 +146,11 @@ class BaseModel(ABC):
 
         # Output Evaluation Results
         subtitles = [
-            f"Test Loss: {test_loss:.2f}",
-            f"Test Accuracy: {test_accuracy:.2f}",
-            f"Test Precision: {test_precision:.2f}", f"Test Recall: {test_recall:.2f}",
-            f"Test AUC: {test_auc:.2f}"
+            f"{'Test Loss':<15}: {test_loss:.4f}",
+            f"{'Test Accuracy':<15}: {test_accuracy:.4f}",
+            f"{'Test Precision':<15}: {test_precision:.4f}",
+            f"{'Test Recall':<15}: {test_recall:.4f}",
+            f"{'Test AUC':<15}: {test_auc:.4f}"
         ]
 
         show_banner(f"{self.title} Evaluation Results", subtitles)
@@ -186,7 +170,6 @@ class BaseModel(ABC):
         :param y_data:
         :return:
         """
-        print(f"DBG: x_data type ={type(x_data)}, y_data type = {type(y_data)}")
 
         # If smote model, use the smote data
         title = self.title + " "
@@ -199,31 +182,6 @@ class BaseModel(ABC):
             y_train = y_data
 
         return x_train, y_train, title
-
-    # @TODO - defunct
-    def _get_model_perf_2(self, model_title: str, x_data, y_data):
-        return ModelPerformance(
-            title=model_title,
-            model=self.model,
-            x_data=x_data,
-            y_data=y_data
-        )
-
-    # @TODO - old version
-    def _get_model_perf(self, x_data: pd.DataFrame, y_data: pd.Series) -> pd.DataFrame:
-        """
-        Get model performance based on normalized or SMOTE data.
-        :param x_data:
-        :param y_data:
-        :return:
-        """
-        return model_performance_classification(self.model, x_data, y_data)
-
-    # @TODO - old version
-    def show_model_perf(self, data_type: str, x_data: pd.DataFrame, y_data: pd.Series) -> None:
-        pass
-        #self.perf = self._get_model_perf(x_data, y_data)
-        #show_banner(f"{self.title} {data_type} Model Performance", [self.perf])
 
     def run(self, x_smote_data=None, y_smote_data=None) -> None:
         """
