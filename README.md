@@ -39,7 +39,7 @@ banking-churn-predictor/
 │   └── sgd_smote_dropout_model.py
 │   └── sgd_smote_model.py
 │   └── smote_model.py
-├── notebooks/                    # Full Jupyter Notebook files
+├── notebooks/                                   # Full Jupyter Notebook files
 │   └── banking_churn_predictor_notebook.html   # Full Notebook in HTML format
 │   └── banking_churn_predictor_notebook.ipynb  # Full Jupyter Notebook
 │   └── banking_churn_predictor_notebook.py     # Converted Python file
@@ -74,12 +74,12 @@ banking-churn-predictor/
    ```
 
 4. Just in case you have issues viewing the EDA consoles it's recommended to download Tcl/Tk
-```bash
-brew install python-tk@3.11
-```
+    ```bash
+    brew install python-tk@3.11
+    ```
 
- ℹ️ Homebrew's Python installation decouples the GUI framework (Tcl/Tk) from the core runtime to save space. Unless
- explicitly installed via Homebrew, Python cannot find the graphic components needed to pop open interactive windows.
+     ℹ️ Homebrew's Python installation decouples the GUI framework (Tcl/Tk) from the core runtime to save space. Unless
+     explicitly installed via Homebrew, Python cannot find the graphic components needed to pop open interactive windows.
 
 ## Usage
 
@@ -88,6 +88,45 @@ To run the main pipeline:
 ```bash
 python main.py
 ```
+
+### Command-line Options
+
+The `main.py` script accepts several command-line arguments to control its behavior, including which models to run and whether to perform Exploratory Data Analysis (EDA).
+
+**General Options:**
+
+*   `--all`: This flag runs all available models. If any specific model flags (e.g., `--model:sgd`) are provided, the `--all` flag is automatically set to `False`, and only the specified models will run. If no model flags are provided, `--all` defaults to `True`.
+*   `--eda`: This flag enables Exploratory Data Analysis. When set, the script will display various visualizations and statistical summaries of the dataset, including salary bar plots, distribution plots, and correlation matrices.
+
+**Model-Specific Options:**
+
+You can specify individual models to run using the following flags. If you specify one or more model flags, the `--all` flag will be ignored, and only the models you explicitly list will be executed.
+
+*   `--model:sgd`: Runs the Neural Network model with Stochastic Gradient Descent (SGD) optimizer.
+*   `--model:adam`: Runs the Neural Network model with the Adam optimizer.
+*   `--model:adam-dropout`: Runs the Neural Network model with the Adam optimizer and Dropout regularization.
+*   `--model:sgd-smote`: Runs the Neural Network model with SGD optimizer and SMOTE (Synthetic Minority Over-sampling Technique) for handling imbalanced datasets.
+*   `--model:adam-smote`: Runs the Neural Network model with the Adam optimizer and SMOTE.
+*   `--model:adam-smote-dropout`: Runs the Neural Network model with the Adam optimizer, Dropout regularization, and SMOTE.
+
+**Examples:**
+
+1.  **Run all models and perform EDA:**
+    ```bash
+    python main.py --all --eda
+    ```
+2.  **Run only the SGD and Adam models without EDA:**
+    ```bash
+    python main.py --model:sgd --model:adam
+    ```
+3.  **Run the Adam model with Dropout and SMOTE, and perform EDA:**
+    ```bash
+    python main.py --model:adam-smote-dropout --eda
+    ```
+4.  **Run all models (default behavior if no model flags are specified) without EDA:**
+    ```bash
+    python main.py
+    ```
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)

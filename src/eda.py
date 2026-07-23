@@ -12,7 +12,6 @@ for each column.
 
 # Vendor Libraries
 import matplotlib
-from src.utils import show_banner
 matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
@@ -30,6 +29,7 @@ from tensorflow.keras.callbacks import History
 from tensorflow.keras.models import Sequential
 
 # Local Libraries
+from src.utils import show_banner
 from src.constants import (
     BALANCE_THRESHOLD,
     PEP8_LINE_LEN,
@@ -288,8 +288,13 @@ def distribution_plot_wrt_target(data: pd.DataFrame, predictor: str, target: str
 
 
 def show_correlation_matrix(df: pd.DataFrame) -> None:
+    """
+    Exclude columns row_number, customer_id and surname as they are not needed for the matrix.
 
-    # Exclude columns row_number, customer_id and surname as they are not needed for the matrix.
+    :param df:
+    :return:
+    """
+
     corr_data = df.copy()
 
     for col in corr_data.columns:
@@ -304,10 +309,19 @@ def show_correlation_matrix(df: pd.DataFrame) -> None:
     plt.title(title)
     plt.show()
 
-def model_performance_classification(mod: Sequential, predictors: pd.DataFrame, target: pd.Series, threshold:float=CUSTOMER_CHURN_PROB_THRESHOLD) -> pd.DataFrame:
+def model_performance_classification(local_model: Sequential, predictors: pd.DataFrame, target: pd.Series, threshold:float=CUSTOMER_CHURN_PROB_THRESHOLD) -> pd.DataFrame:
 
     """
-    Function to compute different metrics to check classification model performance
+    Function to compute different metrics to check classification model performance.
+
+    :param local_model:
+    :param predictors:
+    :param target:
+    :param threshold:
+    :return:
+    """
+    """
+
     model: classifier
     predictors: independent variables
     target: target variable
@@ -315,7 +329,7 @@ def model_performance_classification(mod: Sequential, predictors: pd.DataFrame, 
     """
 
     # Checking which probabilities are greater than a threshold
-    pred = mod.predict(predictors) > threshold
+    pred = local_model.predict(predictors) > threshold
 
     accuracy = accuracy_score(target, pred)
     precision = precision_score(target, pred, average="weighted")
@@ -329,7 +343,6 @@ def show_classification_report(y_test: pd.Series, y_pred: np.ndarray) -> list:
     report_df = pd.DataFrame(report_dict)
 
     lines = []
-
     for class_label in ["0", "1"]:
         label_name = "Loyal Customer (0)" if class_label == "0" else "Churned Customer (1)"
         lines.append(f"Class: {label_name}")

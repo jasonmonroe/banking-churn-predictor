@@ -13,7 +13,7 @@ from tensorflow.keras import Sequential
 
 # Local Libraries
 from src.constants import NEURON_CNT, EPOCH_CNT, BATCH_CNT
-from src.eda import model_performance_classification, plot_model_performance
+from src.eda import plot_model_performance
 from src.utils import start_timer, show_banner, show_timer, get_time
 
 
@@ -72,12 +72,11 @@ class BaseModel(ABC):
     @abstractmethod
     def _create(self) -> Sequential:
         # Initializing the model
+        # https://www.tensorflow.org/guide/keras/sequential_model
         model = Sequential()
 
         # Adding input layer with 64 neurons, relu as activation function and, he_uniform as weight initializer.
-        init_layer = Dense(NEURON_CNT, activation="relu", kernel_initializer="he_uniform", input_dim=self._feature_cnt)
-
-        model.add(init_layer)
+        model.add(Dense(NEURON_CNT, activation="relu", kernel_initializer="he_uniform", input_dim=self._feature_cnt, name="initial_layer"))
 
         return model
 
@@ -85,7 +84,7 @@ class BaseModel(ABC):
         self.model.compile(
             optimizer=self._optimizer,
             loss="binary_crossentropy",
-            metrics=["accuracy", "Precision", "Recall", "AUC"],
+            metrics=["Accuracy", "Precision", "Recall", "AUC"],
         )
 
     def _show_summary(self) -> None:
@@ -162,7 +161,7 @@ class BaseModel(ABC):
 
         return test_loss, test_accuracy, test_precision, test_recall, test_auc
 
-    def _run_model_perf(self, title: str, x_data: pd.DataFrame, y_data: pd.Series):
+    def _run_model_perf(self, title: str, x_data: pd.DataFrame, y_data: pd.Series) -> pd.DataFrame:
         self.model_perf.get(title, self.model, x_data, y_data)
         self.model_perf.show()
 
@@ -197,7 +196,9 @@ class BaseModel(ABC):
         :param y_smote_data:
         :return:
         """
+
         print(f"\n# --- Running {self.title} model --- #\n")
+
         self._show_summary()
         self._compile()
 
@@ -207,6 +208,3 @@ class BaseModel(ABC):
         # Plot Model Performance
         plot_model_performance(history, "accuracy", self.title)
         plot_model_performance(history, "loss", self.title)
-
-
-

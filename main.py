@@ -41,8 +41,8 @@ from models.adam_smote_model import AdamSmoteModel
 from models.sgd_model import SGDModel
 from models.sgd_smote_model import SGDSmoteModel
 from models.smote_model import SmoteModel
-from src.constants import ARG_PARAMS, SEED, CUSTOMER_CHURN_PROB_THRESHOLD, LEARNING_RATE, PEP8_LINE_LEN
-from src.utils import show_banner, start_timer, get_run_id, format_performance
+
+from src.constants import ARG_PARAMS, SEED, CUSTOMER_CHURN_PROB_THRESHOLD, PEP8_LINE_LEN
 from src.eda import (
     show_salary_barplot_visualization,
     show_plot_distributions,
@@ -50,7 +50,7 @@ from src.eda import (
     show_visualizations,
     show_classification_report
 )
-
+from src.utils import show_banner, start_timer, get_run_id, format_performance, show_timer
 
 def run_data_pipeline(args: dict) -> tuple[dict, pd.DataFrame]:
     # Seed data with random integer
@@ -148,6 +148,13 @@ def run_model_pipeline(args: dict, dataset: dict) -> list:
 
 
 def run_model_comparison_pipeline(models: list) -> tuple[pd.DataFrame, pd.DataFrame]:
+
+    """
+    Compares two or more models to see the delta between the evaluations.
+    
+    :param models:
+    :return:
+    """
 
     # There must be at least two models to run a comparison.
     if len(models) > 1:
@@ -262,6 +269,7 @@ def run_main_pipeline(args: dict) -> None:
 
     # Evaluate customer churn probabilities using the final prediction pipeline.
     run_customer_churn_results(final_model, raw_csv_data)
+    return None
 
 
 def _parse_args(command_line_args: list[str]) -> dict:
@@ -298,8 +306,8 @@ if __name__ == '__main__':
     print(f"\n----- ⏱️START RUN ID: {run_id} ⏱️-----")
 
     args = _parse_args(sys.argv[1:])
-    print(f"line 445: args={args}")
     run_main_pipeline(args)
+    show_timer(prog_start_time)
 
     print(f"\n----- ⏱️ END RUN ID: {run_id} ⏱️-----")
 
