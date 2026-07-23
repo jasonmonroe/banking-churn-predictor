@@ -205,7 +205,7 @@ def run_customer_churn_results(final_model, raw_csv_data: pd.DataFrame) -> list:
     results.append(full_line)
     results.append("Report:")
     results.append(f"{customer_churn_ctr} customers are at risk of churning.")
-    results.append(f"That's {customer_churn_pct:.2f}% of our customers!")
+    results.append(f"That's {customer_churn_pct:.1f}% of our customers!")
 
     subtitles.extend(results)
 
