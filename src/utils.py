@@ -195,7 +195,7 @@ def format_performance(df: pd.DataFrame) -> list:
             lines.append(f" Precision : {row_data['Precision']:.4f}")
             lines.append(f" Recall    : {row_data['Recall']:.4f}")
             lines.append(f" F1-Score  : {row_data['F1']:.4f}")
-            lines.append("-") # Empty line break between models
+            lines.append("-" * (PEP8_LINE_LEN - 4)) # Empty line break between models
 
     return lines
 

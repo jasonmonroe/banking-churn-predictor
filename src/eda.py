@@ -329,22 +329,25 @@ def show_classification_report(y_test: pd.Series, y_pred: np.ndarray) -> list:
     report_df = pd.DataFrame(report_dict)
 
     lines = []
+
     for class_label in ["0", "1"]:
         label_name = "Loyal Customer (0)" if class_label == "0" else "Churned Customer (1)"
+        lines.append(f"Class: {label_name}")
 
-    lines.append(f"Class: {label_name}")
-    lines.append(f" Precision : {report_df.loc['precision', class_label]:.4f}")
-    lines.append(f" Recall    : {report_df.loc['recall', class_label]:.4f}")
-    lines.append(f" F1-Score  : {report_df.loc['f1-score', class_label]:.4f}")
-    lines.append(f" Support   : {int(report_df.loc['support', class_label])}")
-    lines.append("")
+        # 🟢 Force the left labels to occupy exactly 12 characters of space
+        lines.append(f"  {'Precision':<12} : {report_df.loc['precision', class_label]:.4f}")
+        lines.append(f"  {'Recall':<12} : {report_df.loc['recall', class_label]:.4f}")
+        lines.append(f"  {'F1-Score':<12} : {report_df.loc['f1-score', class_label]:.4f}")
+        lines.append(f"  {'Support':<12} : {int(report_df.loc['support', class_label])}")
+        lines.append("")
 
     # Parse the global overall summary metrics
     lines.append("Overall Summary:")
-    lines.append(f" Total Accuracy : {report_df.loc['f1-score', 'accuracy']:.4f}") # Accuracy sits in the f1-score row column 'accuracy'
-    lines.append(f" Macro F1-Avg   : {report_df.loc['f1-score', 'macro avg']:.4f}")
-    lines.append(f" Weighted F1-Avg: {report_df.loc['f1-score', 'weighted avg']:.4f}")
+
+    # 🟢 Force the summary labels to occupy exactly 16 characters of space
+    lines.append(f"  {'Total Accuracy':<16} : {report_df.loc['f1-score', 'accuracy']:.4f}")
+    lines.append(f"  {'Macro F1-Avg':<16} : {report_df.loc['f1-score', 'macro avg']:.4f}")
+    lines.append(f"  {'Weighted F1-Avg':<16} : {report_df.loc['f1-score', 'weighted avg']:.4f}")
 
     show_banner("Classification Report", lines)
-
     return lines

@@ -41,7 +41,7 @@ from models.adam_smote_model import AdamSmoteModel
 from models.sgd_model import SGDModel
 from models.sgd_smote_model import SGDSmoteModel
 from models.smote_model import SmoteModel
-from src.constants import ARG_PARAMS, SEED, CUSTOMER_CHURN_PROB_THRESHOLD, LEARNING_RATE
+from src.constants import ARG_PARAMS, SEED, CUSTOMER_CHURN_PROB_THRESHOLD, LEARNING_RATE, PEP8_LINE_LEN
 from src.utils import show_banner, start_timer, get_run_id, format_performance
 from src.eda import (
     show_salary_barplot_visualization,
@@ -59,7 +59,7 @@ def run_data_pipeline(args: dict) -> tuple[dict, pd.DataFrame]:
     tf.random.set_seed(SEED)
 
     subtitles = ["We keep your banking customers from leaving!"]
-    show_banner("QUANTUM BANK CHURN PREDICTIONS", subtitles, center_subtitle_text=True)
+    show_banner("QUANTUM BANK", subtitles, center_subtitle_text=True)
 
     data_handler = DataHandler()
 
@@ -81,7 +81,7 @@ def run_data_pipeline(args: dict) -> tuple[dict, pd.DataFrame]:
 
     dataset = data_handler.get(df)
 
-    return dataset, data
+    return dataset, data.copy()
 
 
 def run_model_pipeline(args: dict, dataset: dict) -> list:
@@ -178,8 +178,9 @@ def run_customer_churn_results(final_model, raw_csv_data: pd.DataFrame) -> None:
     # Get all predictions
     predictions = final_model.model.predict(final_model.x_test_norm, verbose=0)
 
+    full_line = "-" * (PEP8_LINE_LEN - 4)
     header = "Row | Customer ID | Probability | Status"
-    results = [header, "-" * len(header)]
+    results = [full_line, header, full_line]
     for idx, probability in enumerate(predictions):
         prob = probability[0]
         is_churning = prob > CUSTOMER_CHURN_PROB_THRESHOLD
@@ -194,14 +195,14 @@ def run_customer_churn_results(final_model, raw_csv_data: pd.DataFrame) -> None:
         results.append(line)
 
         # Test only 10
-        if idx > 4:
+        if row_number > 4:
             break
 
     subtitles.extend(results)
-    show_banner("Bank Churn Predictor Results".upper(), subtitles)
+    show_banner("Quantum Bank Churn Predictor Results".upper(), subtitles)
 
 
-def run_main_pipeline(args: dict):
+def run_main_pipeline(args: dict) -> None:
     """
     Runs main pipeline for this project.
     :param args:
@@ -210,6 +211,17 @@ def run_main_pipeline(args: dict):
 
     dataset, raw_csv_data = run_data_pipeline(args)
     models = run_model_pipeline(args, dataset)
+
+    if len(models) == 0:
+        raise ValueError("🚩No models found!")
+
+    if len(models) == 1:
+        model = models[0]
+        print("Only 1 model was run.  No comparison can be made and subsequent metrics can not be utilized.")
+        model_data = format_performance(model.model_perf.data)
+        show_banner(f"Final Model (Only): {model.title}", model_data)
+        return None
+
     train_matrix, val_matrix = run_model_comparison_pipeline(models)
 
     best_model_name = ModelPerformance.get_best_model_name(train_matrix, val_matrix)

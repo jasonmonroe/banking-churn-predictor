@@ -53,6 +53,11 @@ class BaseModel(ABC):
         self._feature_cnt = self._count_features()
 
     def _set_attrs(self, dataset) -> None:
+        """
+        Set attributes
+        :param dataset:
+        :return:
+        """
         for key, value in dataset.items():
             if hasattr(self, key):
                 setattr(self, key, value)

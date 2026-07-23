@@ -11,7 +11,6 @@
 ARG_PARAMS = [
     "--all",
     "--eda",    # Show Exploratory Data Analysis
-    "--log",    # Log information
 
     # Models
     "--model:sgd",
