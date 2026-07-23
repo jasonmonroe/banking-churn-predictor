@@ -40,7 +40,7 @@ from tensorflow.keras.models import Sequential
 from src.constants import (
     BALANCE_THRESHOLD,
     PEP8_LINE_LEN,
-    PREDICTION_PROB_THRESHOLD,
+    CUSTOMER_CHURN_PROB_THRESHOLD,
     TARGET_COL,
 )
 
@@ -364,7 +364,7 @@ def show_correlation_matrix(df: pd.DataFrame) -> None:
     plt.show()
 
 
-def model_performance_classification(mod: Sequential, predictors: pd.DataFrame, target: pd.Series, threshold:float=PREDICTION_PROB_THRESHOLD) -> pd.DataFrame:
+def model_performance_classification(mod: Sequential, predictors: pd.DataFrame, target: pd.Series, threshold:float=CUSTOMER_CHURN_PROB_THRESHOLD) -> pd.DataFrame:
 
     """
     Function to compute different metrics to check classification model performance

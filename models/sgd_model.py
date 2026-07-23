@@ -2,7 +2,7 @@
 
 # Vendor Libraries
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import BatchNormalization, Dense, Dropout
+from tensorflow.keras.layers import Dense
 
 # Local Libraries
 from models.base_model import BaseModel
@@ -25,8 +25,9 @@ class SGDModel(BaseModel):
         self.model = self._create()
 
     def _create(self) -> Sequential:
-        # Choose the metric of choice with proper rationale - Train a Neural Network model with SGD as an optimizer
         # Initializing the model
+        # Choose the metric of choice with proper rationale - Train a Neural Network model with SGD as an optimizer.
+
         #sgd_model = Sequential()
 
         # Adding input layer with 64 neurons, relu as activation function and, he_uniform as weight initializer.
@@ -36,11 +37,11 @@ class SGDModel(BaseModel):
 
         # Adding the first and second hidden layer with 32 neurons, relu as activation function and, he_uniform as
         # weight initializer.
-        model.add(Dense(NEURON_DEFAULT_CNT, activation='relu', kernel_initializer='he_uniform'))
-        model.add(Dense(NEURON_DEFAULT_CNT, activation='relu', kernel_initializer='he_uniform'))
+        model.add(Dense(NEURON_DEFAULT_CNT, activation="relu", kernel_initializer="he_uniform"))
+        model.add(Dense(NEURON_DEFAULT_CNT, activation="relu", kernel_initializer="he_uniform"))
 
         # Adding the output layer with one neuron and sigmoid as activation.  This squashes the output to a probability
         # between 0 and 1, which is necessary for classification.
-        model.add(Dense(NEURON_SINGLE_CNT, activation='sigmoid'))
+        model.add(Dense(NEURON_SINGLE_CNT, activation="sigmoid"))
 
         return model

@@ -11,7 +11,7 @@ from src.constants import (
     LEARNING_RATE,
     NEURON_DEFAULT_CNT,
     NEURON_SINGLE_CNT,
-    PREDICTION_PROB_THRESHOLD,
+    CUSTOMER_CHURN_PROB_THRESHOLD,
     SGD_OPT_MOMENTUM,
 )
 
@@ -34,4 +34,4 @@ class SGDSmoteModel(BaseModel):
         return model
 
     def _get_predictor(self) -> int:
-        return (self.model.predict(self.x_test_norm) > PREDICTION_PROB_THRESHOLD).astype(int)
+        return (self.model.predict(self.x_test_norm) > CUSTOMER_CHURN_PROB_THRESHOLD).astype(int)

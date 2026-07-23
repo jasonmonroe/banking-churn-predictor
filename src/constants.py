@@ -44,7 +44,7 @@ SECS_IN_MIN = 60
 BATCH_CNT = 32
 DROPOUT_RATE = 0.25
 DROPOUT_SMOTE_RATE = 0.3
-EPOCH_CNT = 100
+EPOCH_CNT = 2 #100
 NEURON_CNT = 64
 NEURON_DEFAULT_CNT = 32
 NEURON_SINGLE_CNT = 1
@@ -52,8 +52,9 @@ LEARNING_RATE = 0.001
 
 # Misc Parameters
 BALANCE_THRESHOLD = 20000 # In USD ($)
+OVERFITTING_THRESHOLD = 0.15
 PEP8_LINE_LEN = 79
-PREDICTION_PROB_THRESHOLD = 0.5
+CUSTOMER_CHURN_PROB_THRESHOLD = 0.35
 SEED = 42
 
 # Adds speed (inertia) from past steps. A value of 0.9 means the optimizer keeps 90% of its previous direction and adds 

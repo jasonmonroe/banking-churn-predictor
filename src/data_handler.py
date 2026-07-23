@@ -25,7 +25,6 @@ class DataHandler:
 
         # Load and set raw data.  We will export the dataset later.
         self.data = self._load(DATA_FILE_PATH).copy()
-
         self.dataset = pd.DataFrame()
 
 
@@ -96,7 +95,7 @@ class DataHandler:
         return x_dataset.copy(), x_norm_data
 
 
-    def get(self, data) -> dict:
+    def get(self, data: pd.DataFrame) -> dict:
 
         #print(f"type = {type(data)}")
         # Split data

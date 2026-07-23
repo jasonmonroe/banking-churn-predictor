@@ -57,11 +57,9 @@ class BaseModel(ABC):
         for key, value in dataset.items():
             if hasattr(self, key):
                 setattr(self, key, value)
-                #print(f"key={key}, value={value}")
 
     def _count_features(self) -> int:
         count = self.x_train_norm.shape[1]
-
         if count == 0:
             raise ValueError("🚩Error: Feature Count cannot be 0. Please check your data.")
 
@@ -73,7 +71,7 @@ class BaseModel(ABC):
         model = Sequential()
 
         # Adding input layer with 64 neurons, relu as activation function and, he_uniform as weight initializer.
-        init_layer = Dense(NEURON_CNT, activation='relu', kernel_initializer='he_uniform', input_dim=self._feature_cnt)
+        init_layer = Dense(NEURON_CNT, activation="relu", kernel_initializer="he_uniform", input_dim=self._feature_cnt)
 
         model.add(init_layer)
 
@@ -82,8 +80,8 @@ class BaseModel(ABC):
     def _compile(self) -> None:
         self.model.compile(
             optimizer=self._optimizer,
-            loss='binary_crossentropy',
-            metrics=['accuracy', 'Precision', 'Recall', 'AUC'],
+            loss="binary_crossentropy",
+            metrics=["accuracy", "Precision", "Recall", "AUC"],
         )
 
     def _show_summary(self) -> None:
@@ -96,22 +94,19 @@ class BaseModel(ABC):
 
     def _init_early_stopping(self) -> EarlyStopping:
         return EarlyStopping(
-            monitor='val_loss',
-            mode='min',
-            patience=10,
+            monitor="val_loss",
+            mode="min",
+            patience=8,
             restore_best_weights=True
         )
 
     def _init_model_checkpoint(self) -> ModelCheckpoint:
         return ModelCheckpoint(
-            'best_model.keras',
-            monitor='val_loss',
-            mode='min',
+            "best_model.keras",
+            monitor="val_loss",
+            mode="min",
             save_best_only=True
         )
-
-
-
 
     def _build(self, x_data=None, y_data=None) -> History:
         start_time = start_timer()

@@ -1,12 +1,9 @@
 # models/adam_smote_dropout_model.py
 
-
-
 # Vendor Libraries
 from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.optimizers import Adam
-
 
 # Local Libraries
 from models.base_model import BaseModel

@@ -4,8 +4,10 @@
 +---------------------------------------------------------------------------+
 | UTILITIES                                                                  |
 +---------------------------------------------------------------------------+
+Global helper functions for project.
 """
 
+# Python Libraries
 import time
 import random
 import numpy as np
@@ -13,6 +15,7 @@ import tensorflow as tf
 import textwrap
 import uuid
 
+# Local Libraries
 from src.constants import SECS_IN_MIN, PEP8_LINE_LEN
 
 

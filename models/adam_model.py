@@ -1,6 +1,5 @@
 # models/adam_model.py
 
-
 # Vendor Libraries
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.models import Sequential
@@ -8,7 +7,11 @@ from tensorflow.keras.optimizers import Adam
 
 # Local Libraries
 from models.base_model import BaseModel
-from src.constants import LEARNING_RATE, NEURON_DEFAULT_CNT, NEURON_SINGLE_CNT
+from src.constants import (
+    LEARNING_RATE,
+    NEURON_DEFAULT_CNT,
+    NEURON_SINGLE_CNT,
+)
 
 
 class AdamModel(BaseModel):
