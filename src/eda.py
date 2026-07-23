@@ -64,8 +64,14 @@ def show_visualizations(data: pd.DataFrame) -> None:
     labeled_barplot(data, TARGET_COL, perc=True)
 
 def show_salary_barplot_visualization(df: pd.DataFrame) -> None:
-    # Compare estimated salary to bank balance to see if there"s a correlation.
-    # Note: Group the balance by $20,000s to lower the number of values on the x-axis
+    """
+    Compare estimated salary to bank balance to see if there"s a correlation.
+    ℹ️ Note: Group the balance by $20,000s to lower the number of values on the x-axis
+
+    :param df:
+    :return:
+    """
+
     barplot_data = df.copy()
     barplot_data["estimated_salary"] = barplot_data["estimated_salary"].apply(lambda x: x // BALANCE_THRESHOLD)
     barplot_data["balance"] = barplot_data["balance"].apply(lambda x: x // BALANCE_THRESHOLD)
@@ -75,7 +81,8 @@ def show_salary_barplot_visualization(df: pd.DataFrame) -> None:
 
 def show_plot_distributions(df: pd.DataFrame):
     """
-    # Create heatmaps to compare two columns: scatter plots, correlation coefficients, cross-tabulation, pair plot, et
+    Create heatmaps to compare two columns: scatter plots, correlation coefficients, cross-tabulation, pair plot, etc.
+
     :param df:
     :return:
     """
@@ -94,7 +101,7 @@ def show_plot_distributions(df: pd.DataFrame):
 
     # Compare column to whether they (customer) exited (the program).
     for col_name in data_columns:
-        distribution_plot_wrt_target(df, col_name, TARGET_COL)
+        _distribution_plot_wrt_target(df, col_name, TARGET_COL)
 
     # Compare Number of Products for customers with a stacked barplot.
     stacked_barplot(df, "num_of_products", TARGET_COL)
@@ -111,17 +118,18 @@ def plot_model_performance(mod_hist: History, label: str, title: str = "") -> No
     metric_name = label.lower()
     val_metric_name = f"val_{metric_name}"
 
-    _, _ = plt.subplots() # Creating a subplot with a figure and axes.
-    
-    if metric_name in mod_hist.history:
-        plt.plot(mod_hist.history[metric_name], label="Train")
-    if val_metric_name in mod_hist.history:
-        plt.plot(mod_hist.history[val_metric_name], label="Validation")
+    fig, ax = plt.subplots() # Creating a subplot with a figure and axes.
 
-    plt.title(f"{title.title()} Model: {label.title()}") # Defining the title of the plot.
-    plt.ylabel(label.capitalize()) # Capitalizing the first letter.
-    plt.xlabel("Epochs") # Defining the label for the x-axis.
-    plt.legend(loc="upper right")
+    if metric_name in mod_hist.history:
+        ax.plot(mod_hist.history[metric_name], label="Train")
+    if val_metric_name in mod_hist.history:
+        ax.plot(mod_hist.history[val_metric_name], label="Validation")
+
+    ax.set_title(f"{title.title()} Model: {label.title()}")
+    ax.set_ylabel(label.capitalize())
+    ax.set_xlabel("Epochs")
+    ax.legend(loc="upper right")
+
     plt.show()
 
 # Define labeled barplot.
@@ -245,7 +253,7 @@ def stacked_barplot(data: pd.DataFrame, predictor: str, target: str) -> None:
     plt.show()
 
 # Plot distributions
-def distribution_plot_wrt_target(data: pd.DataFrame, predictor: str, target: str) -> None:
+def _distribution_plot_wrt_target(data: pd.DataFrame, predictor: str, target: str) -> None:
 
     # Create heatmaps to compare two columns: scatter plots, correlation coefficients, cross-tabulation, pair plot, etc
     _, axs = plt.subplots(2, 2, figsize=(12, 10))
@@ -339,6 +347,12 @@ def model_performance_classification(local_model: Sequential, predictors: pd.Dat
     return pd.DataFrame({"Accuracy": [accuracy], "Precision": [precision], "Recall": [recall], "F1": [f1]})
 
 def show_classification_report(y_test: pd.Series, y_pred: np.ndarray) -> list:
+    """
+    Shows classification report in banner.
+    :param y_test:
+    :param y_pred:
+    :return:
+    """
     report_dict = classification_report(y_test, y_pred, output_dict=True)
     report_df = pd.DataFrame(report_dict)
 

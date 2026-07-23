@@ -39,7 +39,7 @@ SECS_IN_MIN = 60
 
 # Model Parameters
 BATCH_CNT = 32
-DROPOUT_RATE = 0.175 #0.25
+DROPOUT_RATE = 0.175
 DROPOUT_SMOTE_RATE = 0.3
 EPOCH_CNT = 100
 NEURON_CNT = 64
@@ -65,5 +65,4 @@ SGD_OPT_MOMENTUM = 0.9
 CATEGORICAL_COLS = ["gender", "geography"]
 IRRELEVANT_COLS = ["row_number", "customer_id", "surname"]
 METRIC_COLS = ["Accuracy", "Precision", "Recall", "F1"]
-SCALING_COLS = ["x_train", "x_val", "x_test"]
 TARGET_COL = "exited"

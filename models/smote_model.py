@@ -40,7 +40,5 @@ class SmoteModel:
         :param dataset:
         :return: tuple
         """
-        x_data = dataset["x_train_norm"]
-        y_data = dataset["y_train"]
 
-        return self.model.fit_resample(x_data, y_data)
+        return self.model.fit_resample(dataset["x_train_norm"], dataset["y_train"])

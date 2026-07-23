@@ -14,12 +14,12 @@ import textwrap
 import uuid
 
 # Local Libraries
-from src.constants import SECS_IN_MIN, PEP8_LINE_LEN, METRIC_COLS
+from src.constants import MSEC, SECS_IN_MIN, PEP8_LINE_LEN, METRIC_COLS
 
 
 def get_run_id() -> str:
     """ Generates a unique ID for the current run. """
-    return uuid.uuid4().hex[:5].upper()
+    return uuid.uuid4().hex[:6].upper()
 
 
 def start_timer() -> float:
@@ -40,12 +40,12 @@ def get_time(start_time_float: float) -> str:
     minutes, seconds = divmod(remainder, SECS_IN_MIN)
     fractional_seconds = seconds - int(seconds)
 
-    ms = fractional_seconds * 1000
+    ms = fractional_seconds * MSEC
     return f"{int(minutes)}m {int(seconds)}s {int(ms)}ms"
 
 
 def show_timer(start_time_int: float) -> None:
-    print(f"⏰Run Time: {get_time(start_time_int)}\n")
+    print(f"⏰ Run Time: {get_time(start_time_int)}\n")
 
 
 def _make_top_btm_line() -> str:

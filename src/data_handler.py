@@ -11,7 +11,6 @@ from src.constants import (
     CATEGORICAL_COLS,
     DATA_FILE_PATH,
     IRRELEVANT_COLS,
-    SCALING_COLS,
     SEED,
     TARGET_COL,
     TESTING_SPLIT,
@@ -24,12 +23,28 @@ class DataHandler:
 
         # Load and set raw data.  We will export the dataset later.
         self.data = self._load(DATA_FILE_PATH).copy()
-        self.dataset = pd.DataFrame()
+        self.filtered_data = self._filter(self.data.copy())
+        self.dataset = self._get(self.filtered_data.copy())
 
     def _load(self, filepath: str) -> TextFileReader | pd.DataFrame:
         return pd.read_csv(filepath)
 
-    def filter(self, data: pd.DataFrame) -> pd.DataFrame:
+    def _get(self, data: pd.DataFrame) -> dict:
+        """
+        Returns dataset
+        :param data:
+        :return:
+        """
+
+        # Split data
+        dataset = self._split(data)
+
+        # Scale and normalize data
+        dataset = self._normalize(dataset)
+
+        return dataset
+
+    def _filter(self, data: pd.DataFrame) -> pd.DataFrame:
         # Drop  irrelevant columns
         data = data.drop(columns=IRRELEVANT_COLS, errors='ignore')
 
@@ -38,43 +53,47 @@ class DataHandler:
 
         return data
 
-    def _fit(self, dataset: dict) -> dict:
+    def _normalize(self, dataset: dict) -> dict:
+        """
+        Scales data by normalizing the dataset based on split data (training, validation, testing)
+
+        Checks if we have training data, then returns columns that are numerical and to be converted to normalized data.
+        Normalize data logic
+
+        Training - create x_train_norm with scaler.fit_transform()
+        Validation - create x_val_norm with scaler.transform()
+        Testing - create x_test_norm with scaler.transform()
+
+        :param dataset:
+        :return:
+        """
+
         if dataset.get("x_train") is None:
             raise ValueError("⚠ Error: Data must be split before attempting to fit model.")
 
-        numeric_features = dataset["x_train"].select_dtypes(include=["number"]).columns
+        x_train = dataset.get("x_train")
+        x_val = dataset.get("x_val")
+        x_test = dataset.get("x_test")
 
-        # Scale Training, Validation and Testing datasets
-        for x_col in SCALING_COLS:
-            norm_col = x_col + "_norm"
-            dataset[norm_col], dataset[norm_col][numeric_features] = self._normalize(dataset[x_col], numeric_features)
+        # Identify numeric columns ONCE from the training data
+        numeric_features = x_train.select_dtypes(include=["number"]).columns
 
-        return dataset
+        # Normalize Training
+        x_train_norm = x_train.copy()
+        x_train_norm[numeric_features] = self._scaler.fit_transform(x_train[numeric_features])
 
-    def _normalize(self, x_dataset: dict, numeric_features):
-        """
-        Normalization (often called Min-Max scaling) is the process of translating your data into a fixed range—usually
-        between 0 and 1.
-        :param x_dataset:
-        :param numeric_features:
-        :return:
-        """
+        # Normalize Validation
+        x_val_norm = x_val.copy()
+        x_val_norm[numeric_features] = self._scaler.transform(x_val[numeric_features])
 
-        x_norm_data = self._scaler.fit_transform(x_dataset[numeric_features])
-        return x_dataset.copy(), x_norm_data
+        # Normalize Testing
+        x_test_norm = x_test.copy()
+        x_test_norm[numeric_features] = self._scaler.transform(x_test[numeric_features])
 
-    def get(self, data: pd.DataFrame) -> dict:
-        """
-        Returns dataset
-        :param data:
-        :return:
-        """
-        # Split data
-        dataset = self._split(data)
-
-        # Fit Data
-        dataset = self._fit(dataset)
-        self.dataset = dataset.copy()
+        # Add back to the dataset
+        dataset["x_train_norm"] = x_train_norm
+        dataset["x_val_norm"] = x_val_norm
+        dataset["x_test_norm"] = x_test_norm
 
         return dataset
 

@@ -4,11 +4,13 @@
 from abc import ABC, abstractmethod
 
 # Vendor Libraries
+import numpy as np
 import pandas as pd
 import tensorflow as tf
 from src.model_perf import ModelPerformance
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, History
 from tensorflow.keras.layers import Dense
+from tensorflow.keras.callbacks import ReduceLROnPlateau
 from tensorflow.keras import Sequential
 
 # Local Libraries
@@ -22,12 +24,14 @@ class BaseModel(ABC):
         self._clear_session()
         self._early_stopping = self._init_early_stopping()
         self._model_checkpoint = self._init_model_checkpoint()
+        self._lr_scheduler = self._init_lr_scheduler()
 
         self.title = ""
         self.model = None
         self._optimizer = None
         self.run_time = ""
 
+        # Performance attributes
         self.model_perf = ModelPerformance()
         self.train_perf = None
         self.val_perf = None
@@ -83,8 +87,8 @@ class BaseModel(ABC):
     def _compile(self) -> None:
         self.model.compile(
             optimizer=self._optimizer,
-            loss="binary_crossentropy",
-            metrics=["Accuracy", "Precision", "Recall", "AUC"],
+            loss="binary_crossentropy", # should i use this or 'sparse_categorical_crossentropy'
+            metrics=["accuracy", "precision", "recall", "auc"],
         )
 
     def _show_summary(self) -> None:
@@ -111,26 +115,54 @@ class BaseModel(ABC):
             save_best_only=True
         )
 
-    def _build(self, x_data=None, y_data=None) -> History:
-        start_time = start_timer()
-
-        # Get the training data for fitting the model
-        # Note: Data is either normalized or SMOTE
-        x_train, y_train, perf_title = self._get_train_data(x_data, y_data)
-
-        # Fit model
-        model_history = self.model.fit(
-            x_train,
-            y_train,
-            validation_data=(self.x_val_norm, self.y_val),
-            epochs=EPOCH_CNT,
-            batch_size=BATCH_CNT,
-            verbose=2,
-            callbacks=[self._early_stopping, self._model_checkpoint],
+    def _init_lr_scheduler(self) -> ReduceLROnPlateau:
+        return ReduceLROnPlateau(
+            monitor="val_loss",     # Metric to monitor (e.g., "val_loss" or "val_auc")
+            factor=0.5,             # Factor by which the learning rate will be reduced (new_lr = lr * factor)
+            patience=3,             # Number of epochs with no improvement after which learning rate will be reduced
+            verbose=1,              # Message type: 1 prints a message when the lr is reduced
+            min_delta=1e-4,         # Threshold for measuring the new optimum, to only focus on significant changes
+            mode="min",             # "min" means learning rate will be reduced when the monitored quantity stops decreasing
+            cooldown=0,             # Number of epochs to wait before resuming normal operation after lr has been reduced
+            min_lr=1e-6             # Lower bound on the learning rate
         )
 
-        # Evaluate model
-        self.evaluate()
+    def _build(self, input_data: pd.DataFrame | np.ndarray | None, target_data: pd.Series | np.ndarray | None) -> History:
+        """
+        https://geeksforgeeks.org/deep-learning/model-fit-in-tensorflow/
+
+        :param x_data:
+        :param y_data:
+        :return:
+        """
+
+        """
+        Build Model Logic
+        To get model history use model.fit(x=x_data, y=y_data) with validation data (x_val_norm, y_val)
+        #Training: x_data=x_train_norm, y_data=y_train, validation_data=(x_val_norm, y_val)
+        #Validation: x_data=x_val_norm, y_data=y_val, validation_data=(x_val_norm, y_val)
+        Testing: x_data=x_test_norm, y_data=y_test, NO FITTING, just evaluate(), no plotting model performance
+        """
+
+        start_time = start_timer()
+
+        # Get the data for fitting the model
+        # ℹ️ Note: Data is either normalized or SMOTE
+        x_data, y_data, perf_title = self._get_train_data(input_data, target_data)
+
+        # Fit model
+        # https://geeksforgeeks.org/deep-learning/model-fit-in-tensorflow/
+        model_history = self.model.fit(
+            x=x_data,
+            y=y_data,
+            batch_size=BATCH_CNT,
+            epochs=EPOCH_CNT,
+            verbose=2,
+            validation_data=(self.x_val_norm, self.y_val),
+            validation_split=0.0,
+            callbacks=[self._lr_scheduler, self._early_stopping, self._model_checkpoint],
+            shuffle=True, # Prevents Batch Bias and improves convergence
+        )
 
         self.run_time = get_time(start_time)
         show_timer(start_time)
@@ -141,11 +173,37 @@ class BaseModel(ABC):
 
         return model_history
 
-    def evaluate(self):
+    def evaluate(self) -> tuple:
+        """
+        Evaluates model.
+
+        https://www.tensorflow.org/guide/keras/training_with_built_in_methods
+        https://https://www.geeksforgeeks.org/deep-learning/model-evaluate-in-tensorflow/
+
+
+        model.evaluate(
+        x=None,
+        y=None,
+        batch_size=None,
+        verbose=1,
+        sample_weight=None,
+        steps=None,
+        callbacks=None,
+        return_dict=False,
+        use_multiprocessing=False
+        )
+
+        :param x_data:
+        :param y_data:
+        :return:
+        """
+
         test_loss, test_accuracy, test_precision, test_recall, test_auc = self.model.evaluate(
-            self.x_test_norm,
-            self.y_test,
-            verbose=2
+            x=self.x_train_norm,
+            y=self.y_test,
+            batch_size=BATCH_CNT,
+            verbose=2,
+            return_dict=True,
         )
 
         # Output Evaluation Results
@@ -157,7 +215,7 @@ class BaseModel(ABC):
             f"{'Test AUC':<15}: {test_auc:.4f}"
         ]
 
-        show_banner(f"{self.title} Evaluation Results", subtitles)
+        show_banner(f"{self.title} Evaluation Test Results", subtitles)
 
         return test_loss, test_accuracy, test_precision, test_recall, test_auc
 
@@ -167,30 +225,37 @@ class BaseModel(ABC):
 
         return self.model_perf.data
 
-    def _get_train_data(self, x_data: pd.DataFrame | None, y_data: pd.Series | None) -> tuple[pd.DataFrame, pd.Series, str]:
+    def _get_train_data(self, x_data: pd.DataFrame | np.ndarray | None, y_data: pd.Series | np.ndarray | None):
         """
-        Get normalized or SMOTE data for model performance.
+        Non-Smote Usage:
+        Training: x_data=self.x_train_norm, y_data=self.y_train
+        Validation: x_data=self.x_val_norm, y_data=self.y_val
+        Testing: x_data=self.x_test_normm y_data=self.y_test
+
+        Smote Usage
+        Training: x_data=x_smote, y_data=y_smote,
+        Validation: x_data=self.x_val_norm, y_data=self.y_val
+        Testing: Not applicable
+
         :param x_data:
         :param y_data:
         :return:
         """
 
-        # If smote model, use the smote data
-        title = self.title + " "
-        x_train = self.x_train_norm
-        y_train = self.y_train
-
         if x_data is not None and y_data is not None:
-            title = f"{self.title} SMOTE "
-            x_train = x_data
-            y_train = y_data
+            # Smote Data is being used
+            return x_data, y_data, self.title + " SMOTE "
+        else:
+            return self.x_train_norm, self.y_train, self.title
 
-        return x_train, y_train, title
-
-    def run(self, x_smote_data=None, y_smote_data=None) -> None:
+    def run(self, x_smote_data=pd.DataFrame | np.ndarray | None, y_smote_data=pd.Series | np.ndarray | None) -> None:
         """
         Run the model to get the training validation performances.
         Then plot the models performance  based on accuracy and loss.
+
+        ❗Important: If smote data is used as arguments override the other data. Only use x_smote, y_smote
+        for training, validation will still use x_val_norm, y_val
+
 
         :param x_smote_data:
         :param y_smote_data:

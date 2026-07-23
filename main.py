@@ -61,9 +61,26 @@ def run_data_pipeline(args: dict) -> tuple[dict, pd.DataFrame]:
     subtitles = ["We keep your banking customers from leaving!"]
     show_banner("QUANTUM BANK", subtitles, center_subtitle_text=True)
 
+    # Create data handler and return datasets
     data_handler = DataHandler()
+    raw_df = data_handler.data
+    dataset_df = data_handler.dataset
 
-    # load data
+    if args.get("eda"):
+        data_handler.describe()
+        filtered_df = data_handler.filtered_data
+
+        show_visualizations(raw_df)
+        show_salary_barplot_visualization(raw_df)
+        show_plot_distributions(raw_df)
+        show_correlation_matrix(filtered_df)
+
+    return dataset_df, raw_df
+
+
+    """
+    OLD VERSION
+    # load raw data
     data = data_handler.data
     df = data.copy()
 
@@ -82,6 +99,7 @@ def run_data_pipeline(args: dict) -> tuple[dict, pd.DataFrame]:
     dataset = data_handler.get(df)
 
     return dataset, data.copy()
+    """
 
 
 def run_model_pipeline(args: dict, dataset: dict) -> list:
@@ -151,7 +169,7 @@ def run_model_comparison_pipeline(models: list) -> tuple[pd.DataFrame, pd.DataFr
 
     """
     Compares two or more models to see the delta between the evaluations.
-    
+
     :param models:
     :return:
     """
@@ -234,10 +252,12 @@ def run_main_pipeline(args: dict) -> None:
         raise ValueError("🚩No models found!")
 
     if len(models) == 1:
-        model = models[0]
         print("Only 1 model was run.  No comparison can be made and subsequent metrics can not be utilized.")
+
+        model = models[0]
         model_data = format_performance(model.model_perf.data)
         show_banner(f"Final Model (Only): {model.title}", model_data)
+
         return None
 
     train_matrix, val_matrix = run_model_comparison_pipeline(models)
